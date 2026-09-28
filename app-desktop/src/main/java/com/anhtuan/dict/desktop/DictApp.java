@@ -1,6 +1,7 @@
 package com.anhtuan.dict.desktop;
 
 import com.anhtuan.dict.desktop.config.AppContext;
+import com.anhtuan.dict.desktop.ui.AppIcon;
 import com.anhtuan.dict.desktop.ui.MainView;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -46,6 +47,7 @@ public final class DictApp extends Application {
             label.setStyle("-fx-padding: 16; -fx-font-family: 'Consolas', monospace;");
             stage.setScene(new Scene(new VBox(label), 720, 260));
             stage.setTitle("Tu dien offline - thieu du lieu");
+            AppIcon.applyTo(stage);
             stage.show();
             return;
         }

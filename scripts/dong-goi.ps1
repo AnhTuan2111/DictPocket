@@ -127,6 +127,14 @@ $jpArgs = @(
     "--java-options", "-Xmx512m",
     "--add-modules", "java.base,java.desktop,java.logging,java.management,jdk.unsupported"
 )
+
+# Icon cua file .exe va cua bo cai. Hai ban khac mau de nhin thanh taskbar la biet dang mo
+# ban nao. Sinh lai bang: python scripts\tao-icon.py
+$icoName = if ($WithNmt) { "app-ai.ico" } else { "app.ico" }
+$ico = Join-Path $root "app-desktop\src\main\resources\icon\$icoName"
+if (Test-Path $ico) { $jpArgs += @("--icon", $ico) }
+else { Write-Host "   (khong thay $icoName, dung icon Java mac dinh)" -ForegroundColor Yellow }
+
 if ($Type -ne "app-image") { $jpArgs += @("--win-dir-chooser", "--win-menu", "--win-shortcut") }
 
 & jpackage @jpArgs

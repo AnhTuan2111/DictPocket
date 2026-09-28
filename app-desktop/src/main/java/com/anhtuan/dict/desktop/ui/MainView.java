@@ -101,6 +101,7 @@ public final class MainView {
                 () -> { input.requestFocus(); input.selectAll(); });
 
         stage.setTitle("Từ điển offline Anh - Việt  " + AppVersion.display());
+        AppIcon.applyTo(stage);
         stage.setScene(scene);
         stage.show();
         input.requestFocus();
