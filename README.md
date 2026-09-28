@@ -116,6 +116,21 @@ java -jar dict-importer\target\dict-importer.jar build `
      anhviet109K.txt data\build data\thuat-ngu-cntt.tsv data\thuat-ngu-y-te.tsv
 ```
 
+### Nhánh
+
+| Nhánh | Dùng để |
+|---|---|
+| `main` | chỉ chứa những gì đã phát hành. Mỗi bản phát hành là một thẻ `vX.Y.Z` trên nhánh này. |
+| `develop` | nơi làm việc hằng ngày. Gộp vào `main` khi chuẩn bị phát hành. |
+
+Phát hành xong, `phat-hanh.ps1` tự đẩy số phiên bản trong pom lên `X.Y.(Z+1)-SNAPSHOT` để
+lần sau làm tiếp không giẫm vào bản đã phát hành. Nhớ gộp `main` ngược lại `develop` sau đó:
+
+```powershell
+git switch develop
+git merge main
+```
+
 ### Tự đóng gói
 
 ```powershell
