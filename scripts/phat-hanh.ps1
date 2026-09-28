@@ -8,6 +8,7 @@
     Ket qua nam trong dist\release\v<phien-ban>\ :
         TuDienOffline-<ver>.msi          ban thuong, khong co AI
         TuDienOffline-AI-<ver>.msi       ban kem mo hinh no-ron
+        TuDienOffline-<ver>-windows.zip  ban portable, giai nen la chay, khong can cai
         SHA256SUMS.txt                   ma bam de nguoi tai kiem tra
         GHI-CHU-PHAT-HANH.md             ghi chu lay tu CHANGELOG
 
@@ -73,9 +74,16 @@ try {
         Copy-Item "dist\msi\*.msi" $releaseDir
     }
 
+    # Ban portable: giai nen la chay, khong dung toi registry, xoa thu muc la sach. Co nguoi
+    # khong cai duoc phan mem tren may minh, va co nguoi chi muon thu roi xoa.
+    Write-Host "==> Dung ban portable (.zip)..." -ForegroundColor Cyan
+    & "$PSScriptRoot\dong-goi.ps1" -Type app-image -Version $Version -Zip
+    if ($LASTEXITCODE -ne 0) { throw "dung ban portable that bai" }
+    Copy-Item "dist\TuDienOffline-$Version-windows.zip" $releaseDir
+
     # --- 5. Ma bam ---
     Write-Host "==> Tinh SHA256..." -ForegroundColor Cyan
-    $lines = Get-ChildItem "$releaseDir\*.msi" | ForEach-Object {
+    $lines = Get-ChildItem "$releaseDir\*.msi", "$releaseDir\*.zip" | ForEach-Object {
         $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
         "{0}  {1}  ({2:N1} MB)" -f $h, $_.Name, ($_.Length / 1MB)
     }
