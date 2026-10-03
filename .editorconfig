@@ -1,0 +1,23 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{xml,yml,yaml,json}]
+indent_size = 2
+
+# Kiểu ngoặc Allman cho IntelliJ: mở ngoặc ở dòng riêng, else/catch/finally cũng xuống dòng
+[*.java]
+ij_java_class_brace_style = next_line
+ij_java_method_brace_style = next_line
+ij_java_brace_style = next_line
+ij_java_lambda_brace_style = next_line
+ij_java_else_on_new_line = true
+ij_java_catch_on_new_line = true
+ij_java_finally_on_new_line = true
+ij_java_while_on_new_line = true
+ij_java_use_single_class_imports = true

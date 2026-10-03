@@ -1,12 +1,18 @@
 # Maven
 target/
 *.versionsBackup
+# maven-shade-plugin sinh ra, đổi theo số phiên bản trong pom nên gây nhiễu mỗi lần phát hành
+dict-importer/dependency-reduced-pom.xml
 
+# Dữ liệu sinh lại được bằng scripts/run.ps1 -Rebuild
 /data/*.txt
 /data/build/
-# Kho cau song ngu tai ve luc hoc bang xac suat (100 MB+), sinh lai duoc
+# Kho câu song ngữ tải về lúc học bảng xác suất (100 MB+)
 /corpus/
-/docs
+
+# Tài liệu cá nhân của tác giả, chỉ giữ lại ảnh chụp dùng trong README
+/docs/*
+!/docs/screenshots/
 
 # IDE
 .idea/
@@ -20,15 +26,10 @@ target/
 Thumbs.db
 .DS_Store
 
-# Packing
-# Ban dong goi (jpackage) - 97 MB, sinh lai bang scripts/dong-goi.ps1
+# Bản đóng gói (jpackage), sinh lại bằng scripts/package.ps1
 /dist/
 *.msi
 *.exe
 
-# WiX portable tai ve de lam bo cai .msi (41 MB), sinh lai duoc
+# WiX portable tải về để làm bộ cài .msi (41 MB)
 /tools/
-
-
-# Sinh boi maven-shade-plugin, doi theo so phien ban trong pom nen gay nhieu moi lan phat hanh
-dict-importer/dependency-reduced-pom.xml
