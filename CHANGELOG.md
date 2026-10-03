@@ -16,6 +16,32 @@ Cả hai đều chạy **hoàn toàn offline** — không có một dòng mã n�
 
 ## [Chưa phát hành]
 
+### Sửa
+Bốn lỗi phát hiện khi cài thử `v1.0.0` lên một máy Windows thật, không lỗi nào lộ ra khi
+chạy từ mã nguồn:
+
+- **Bộ cài đòi quyền administrator.** `msiexec` dừng ở `Error 1925 — You do not have
+  sufficient privileges to complete this installation for all users of the machine`. Mặc
+  định của `jpackage` là cài cho cả máy. Thêm `--win-per-user-install`: nay cài vào
+  `%LOCALAPPDATA%` trong 3,0 giây, không cần admin. Đây là lỗi nặng nhất vì người dùng
+  chính của ứng dụng là sinh viên dùng máy trường, phần lớn không có quyền đó.
+- **Bản đóng gói đọc nhầm dữ liệu.** `DataLocator` xét `./data/build` và `../data/build`
+  — tính theo *thư mục hiện hành* — **trước** thư mục dữ liệu đi kèm bản cài. Mở ứng dụng
+  từ một cửa sổ dòng lệnh đang đứng ở cây mã nguồn thì nó đọc dữ liệu của cây mã nguồn,
+  mà thanh trạng thái vẫn báo bình thường. Nay dữ liệu đi kèm được xét trước.
+- **Bản phát hành ghi sai số phiên bản.** Thanh tiêu đề của `v1.0.0` hiện
+  `v1.0.1-SNAPSHOT`. Tên file jar có mang số phiên bản, nên đổi phiên bản rồi build lại mà
+  không `clean` thì `target\` còn cả jar cũ lẫn jar mới, và `Copy-Item` với wildcard lấy
+  nhầm jar cũ. Thêm `clean`, và thêm hàm `Copy-OneJar` dừng hẳn khi wildcard khớp nhiều
+  hơn một file — lần sau lỗi này sẽ kêu to thay vì im lặng.
+- **Shortcut nằm trong thư mục Start Menu tên "Unknown"** — mặc định của `jpackage` khi
+  không khai báo `--win-menu-group`. Nay là "Tu dien offline".
+
+### Thay đổi
+- `dict-importer/dependency-reduced-pom.xml` do `maven-shade-plugin` sinh ra, không theo
+  dõi trong git nữa: nó đổi theo số phiên bản nên commit phát hành nào cũng dính nó.
+
+
 ## [1.0.0] — 2026-09-28
 
 Bản phát hành đầu tiên.
