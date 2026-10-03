@@ -16,6 +16,8 @@ Cả hai đều chạy **hoàn toàn offline** — không có một dòng mã n�
 
 ## [Chưa phát hành]
 
+## [1.0.1] — 2026-10-03
+
 ### Sửa
 Bốn lỗi phát hiện khi cài thử `v1.0.0` lên một máy Windows thật, không lỗi nào lộ ra khi
 chạy từ mã nguồn:
@@ -106,5 +108,6 @@ Bản phát hành đầu tiên.
 - **Nhét từ ghép tiếng Việt vào chỉ mục**: làm xong, đo, thấy chỉ mục phình 47% mà thứ tự
   kết quả gần như không đổi → bỏ. Danh sách từ ghép chuyển sang dùng cho gợi ý chính tả.
 
-[Chưa phát hành]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.0...HEAD
+[Chưa phát hành]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AnhTuan2111/offline-translate-vi-en/releases/tag/v1.0.0
