@@ -1,6 +1,7 @@
+# name: Thuật ngữ CNTT
 # TỪ ĐIỂN THUẬT NGỮ CÔNG NGHỆ THÔNG TIN
 #
-# Nạp bằng:  ImporterMain build anhviet109K.txt data/build data/thuat-ngu-cntt.tsv
+# Nạp bằng:  ImporterMain build anhviet109K.txt data/build data/it-terms.tsv
 # Rồi mở "Nguồn từ điển" trong app, kéo nguồn này LÊN TRÊN từ điển 109K.
 #
 # Vì sao cần: 109K là từ điển phổ thông nên với văn bản kỹ thuật nó chọn nghĩa đời thường
