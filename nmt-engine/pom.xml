@@ -7,20 +7,15 @@
   <parent>
     <groupId>com.anhtuan.dict</groupId>
     <artifactId>offline-translate-vi-en</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>nmt-engine</artifactId>
   <name>nmt-engine</name>
-  <description>
-    Dich may no-ron chay cuc bo: opus-mt-en-vi xuat sang ONNX, chay bang ONNX Runtime.
+  <description>Optional local neural translation: opus-mt-en-vi exported to ONNX, run with ONNX Runtime.</description>
 
-    DAY LA MODULE TUY CHON. Ung dung chay binh thuong khi khong co no - luc do dung engine
-    dich bang luat. Tach rieng ra de dict-core giu duoc zero dependency (PLAN.md muc 9) va de
-    ai khong muon dinh den mo hinh AI thi chi viec khong build module nay.
-
-    Mo hinh KHONG nam trong repo: tai rieng bang scripts/tai-model-nmt.ps1 (~101 MB).
-  </description>
+  <!-- Module tuỳ chọn: thiếu nó app vẫn chạy bằng engine dịch theo luật. Tách riêng để dict-core
+       không có dependency. Mô hình (~101 MB) không nằm trong repo, tải bằng scripts/download-nmt-model.ps1. -->
 
   <dependencies>
     <dependency>
@@ -28,15 +23,14 @@
       <artifactId>dict-core</artifactId>
     </dependency>
 
-    <!-- Chay do thi ONNX. Ban chinh thuc cua Microsoft, co binding Java. -->
+    <!-- Chạy đồ thị ONNX, bản chính thức của Microsoft có binding Java -->
     <dependency>
       <groupId>com.microsoft.onnxruntime</groupId>
       <artifactId>onnxruntime</artifactId>
       <version>${onnxruntime.version}</version>
     </dependency>
 
-    <!-- KHONG dung ai.djl.huggingface:tokenizers. Da thu: no lam sup ca JVM khi doc
-         tokenizer.json cua model nay (precompiled_charsmap = null). Tach tu duoc viet lai
-         trong MarianTokenizer.java, chua toi 150 dong va khong can thu vien native. -->
+    <!-- Không dùng ai.djl.huggingface:tokenizers: nó làm sập cả JVM khi đọc tokenizer.json của mô hình
+         này (precompiled_charsmap = null). Bộ tách từ được viết lại trong MarianTokenizer.java. -->
   </dependencies>
 </project>

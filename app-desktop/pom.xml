@@ -7,19 +7,12 @@
   <parent>
     <groupId>com.anhtuan.dict</groupId>
     <artifactId>offline-translate-vi-en</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>app-desktop</artifactId>
   <name>app-desktop</name>
-  <description>
-    UI JavaFX. KHONG co Spring: AD-8 da duoc sua lai, DI lam bang composition root
-    thu cong trong config/AppContext.java (ly do ghi ngay trong javadoc cua class do).
-
-    CANH BAO (PLAN.md AD-7): TUYET DOI khong them javafx-web.
-    No keo theo WebKit: +35 MB dia, +40 MB RAM. Dung TextFlow de render.
-    Kiem tra bang: mvn -pl app-desktop dependency:tree | grep javafx
-  </description>
+  <description>JavaFX desktop UI.</description>
 
   <dependencies>
     <dependency>
@@ -27,36 +20,32 @@
       <artifactId>dict-core</artifactId>
     </dependency>
 
-    <!-- JavaFX: CHI controls. Khong web, khong media, khong swing. -->
+    <!-- Chỉ javafx-controls. Tuyệt đối không thêm javafx-web: nó kéo theo WebKit (+35 MB đĩa, +40 MB RAM).
+         Kiểm tra: mvn -pl app-desktop dependency:tree | grep javafx -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
       <version>${javafx.version}</version>
     </dependency>
 
-    <!-- Dich bang mo hinh no-ron. <optional> nghia la: bien dich thi can, nhung KHONG tu
-         dong di theo khi dong goi. Muon ban co AI thi chay dong-goi.ps1 -WithNmt; khong thi
-         app van chay va tu an tinh nang di. Nho vay ban mac dinh khong phai keo theo
-         132 MB jar cua ONNX Runtime. -->
+    <!-- Dịch bằng mô hình nơ-ron. optional: cần để biên dịch nhưng không tự đi theo khi đóng gói.
+         Muốn bản có AI thì chạy package.ps1 -WithNmt; không thì app vẫn chạy và tự ẩn tính năng. -->
     <dependency>
       <groupId>com.anhtuan.dict</groupId>
       <artifactId>nmt-engine</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
     </dependency>
-
-    <!-- KHONG co dependency nao khac. Toan bo app chi gom: dict-core (0 dep) + JavaFX.
-         sqlite-jdbc se duoc them lai o M6 khi thuc su can luu lich su nguoi dung. -->
   </dependencies>
 
   <properties>
-    <!-- Ban phat hanh: "thuong" hoac "ai". Bo dong goi ghi de bang -Ddict.edition=ai. -->
-    <dict.edition>thuong</dict.edition>
+    <!-- Loại bản phát hành: "standard" hoặc "ai". Bộ đóng gói ghi đè bằng -Ddict.edition=ai -->
+    <dict.edition>standard</dict.edition>
   </properties>
 
   <build>
     <resources>
-      <!-- Loc version.properties de app biet minh la phien ban nao, ban nao. -->
+      <!-- Lọc version.properties để app biết mình là phiên bản nào, bản nào -->
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>

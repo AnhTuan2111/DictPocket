@@ -7,19 +7,13 @@
   <parent>
     <groupId>com.anhtuan.dict</groupId>
     <artifactId>offline-translate-vi-en</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>dict-core</artifactId>
   <name>dict-core</name>
-  <description>
-    Loi tu dien: pack format, inverted index, NLP, dich cau.
+  <description>Dictionary core: pack format, inverted index, NLP, sentence glossing.</description>
 
-    QUY TAC BAT BIEN (xem PLAN.md AD-6, muc 9):
-    Module nay KHONG duoc them BAT KY dependency runtime nao.
-    Khong Spring. Khong JavaFX. Khong thu vien nen ngoai. Chi JDK.
-    Nho vay sau nay tai dung duoc cho Android / CLI / web ma khong keo theo gi.
-  </description>
-
-  <!-- Khong co <dependencies> runtime. JUnit da ke thua tu parent voi scope test. -->
+  <!-- Quy tắc bất biến: module này không có dependency runtime nào, chỉ dùng JDK,
+       để tái dùng được cho CLI hoặc nền tảng khác mà không kéo theo gì. JUnit kế thừa từ parent. -->
 </project>
