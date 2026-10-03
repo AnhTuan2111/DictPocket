@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.anhtuan.dict</groupId>
     <artifactId>offline-translate-vi-en</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>nmt-engine</artifactId>
