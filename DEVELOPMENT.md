@@ -5,8 +5,8 @@ Tài liệu cho lập trình viên. Người dùng phần mềm không cần đ�
 Cần **JDK 25** và **Maven 3.9+**.
 
 ```powershell
-git clone https://github.com/AnhTuan2111/offline-translate-vi-en.git
-cd offline-translate-vi-en
+git clone https://github.com/AnhTuan2111/DictPocket.git
+cd DictPocket
 .\scripts\run.ps1 -Rebuild
 ```
 

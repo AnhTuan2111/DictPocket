@@ -1,13 +1,13 @@
 <p align="center"><img src="docs/screenshots/banner.png" width="920" alt="DictPocket: từ điển và dịch câu Anh–Việt, dùng hoàn toàn offline"></p>
 
 <p align="center">
-<a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-Setup.msi"><img src="docs/screenshots/btn-download.png" width="430" alt="Tải DictPocket, bản thường 46 MB"></a>
-<a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-AI-Setup.msi"><img src="docs/screenshots/btn-download-ai.png" width="430" alt="Tải DictPocket AI, 185 MB"></a>
+<a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-Setup.msi"><img src="docs/screenshots/btn-download.png" width="430" alt="Tải DictPocket, bản thường 46 MB"></a>
+<a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-AI-Setup.msi"><img src="docs/screenshots/btn-download-ai.png" width="430" alt="Tải DictPocket AI, 185 MB"></a>
 </p>
 
 <p align="center">
 Hầu hết mọi người nên chọn <b>bản thường</b>. Bản <b>AI</b> thêm bộ dịch máy chạy ngay trên máy bạn, dịch câu dài mượt hơn nhưng lâu hơn nửa giây mỗi câu.<br>
-Không muốn cài? <a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-Portable.zip">Bản chạy thẳng (45 MB)</a>: giải nén, bấm <code>DictPocket.exe</code>, xoá thư mục là sạch.
+Không muốn cài? <a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-Portable.zip">Bản chạy thẳng (45 MB)</a>: giải nén, bấm <code>DictPocket.exe</code>, xoá thư mục là sạch.
 </p>
 
 > **Đừng bấm nút `Code` màu xanh** hay hai dòng `Source code` ở trang Releases: đó là mã nguồn, không có phần mềm.
@@ -70,4 +70,4 @@ gỡ nó trong **Settings → Apps**. Không mất dữ liệu gì.
 Miễn phí, dùng cho mục đích cá nhân và học tập. Bộ dịch máy dùng mô hình
 [opus-mt-en-vi](https://huggingface.co/Xenova/opus-mt-en-vi) (Helsinki-NLP, Apache-2.0).
 Bộ từ điển chung lấy từ một tập dữ liệu Anh–Việt lưu hành trên mạng mà **chưa xác minh được giấy phép**;
-nếu bạn giữ bản quyền, mở một [issue](https://github.com/AnhTuan2111/offline-translate-vi-en/issues) là sẽ được gỡ.
+nếu bạn giữ bản quyền, mở một [issue](https://github.com/AnhTuan2111/DictPocket/issues) là sẽ được gỡ.
