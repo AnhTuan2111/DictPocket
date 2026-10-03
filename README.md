@@ -1,9 +1,6 @@
 <p align="center"><img src="docs/screenshots/banner.png" width="920" alt="DictPocket: từ điển và dịch câu Anh–Việt, dùng hoàn toàn offline"></p>
 
-<p align="center">
-<a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-Setup.msi"><img src="docs/screenshots/btn-download.png" width="430" alt="Tải DictPocket, bản thường 46 MB"></a>
-<a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-AI-Setup.msi"><img src="docs/screenshots/btn-download-ai.png" width="430" alt="Tải DictPocket AI, 185 MB"></a>
-</p>
+<p align="center"><a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-Setup.msi"><img src="docs/screenshots/btn-download.png" width="49%" alt="Tải DictPocket, bản thường 46 MB"></a><a href="https://github.com/AnhTuan2111/DictPocket/releases/latest/download/DictPocket-AI-Setup.msi"><img src="docs/screenshots/btn-download-ai.png" width="49%" alt="Tải DictPocket AI, 185 MB"></a></p>
 
 <p align="center">
 Hầu hết mọi người nên chọn <b>bản thường</b>. Bản <b>AI</b> thêm bộ dịch máy chạy ngay trên máy bạn, dịch câu dài mượt hơn nhưng lâu hơn nửa giây mỗi câu.<br>
