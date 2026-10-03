@@ -16,6 +16,12 @@ Cả hai đều chạy **hoàn toàn offline** — không có một dòng mã n�
 
 ## [Chưa phát hành]
 
+### Thêm
+- `phat-hanh.ps1` chặn nếu không đứng trên nhánh `main` (bỏ qua bằng `-AllowAnyBranch`).
+  Script gắn thẻ vào đúng chỗ `HEAD` đang đứng, nên chạy nhầm nhánh thì thẻ nằm trên
+  `develop` còn `main` vẫn ở bản cũ — đã vấp đúng vậy khi phát hành `v1.0.1`.
+
+
 ## [1.0.1] — 2026-10-03
 
 ### Sửa

@@ -19,7 +19,8 @@ param(
     [Parameter(Mandatory = $true)][string]$Version,
     [switch]$NoTag,
     [switch]$OnlyBasic,
-    [switch]$SkipTests
+    [switch]$SkipTests,
+    [switch]$AllowAnyBranch
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
@@ -29,13 +30,22 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw "Phien ban phai dang X.Y.Z, vi
 $tag = "v$Version"
 $releaseDir = Join-Path $root "dist\release\$tag"
 
-# --- 1. Cay lam viec phai sach ---
+# --- 1. Phai dung tren nhanh main ---
+# Quy uoc: main chi chua thu da phat hanh, develop la cho lam viec hang ngay. Script gan the
+# vao DUNG CHO HEAD dang dung, nen chay nham nhanh thi the nam tren develop va main thi van
+# o ban cu. Da vap dung vay khi phat hanh v1.0.1.
+$branch = (git rev-parse --abbrev-ref HEAD).Trim()
+if ($branch -ne "main" -and -not $AllowAnyBranch) {
+    throw "Dang o nhanh '$branch'. Phat hanh tu main:`n  git switch main`n  git merge --ff-only $branch`nHoac them -AllowAnyBranch neu co y lam vay."
+}
+
+# --- 2. Cay lam viec phai sach ---
 $dirty = git status --porcelain
 if ($dirty) {
     throw "Con thay doi chua commit. Phat hanh tu cay lam viec ban la khong lan ra duoc ban nao da di vao bo cai:`n$dirty"
 }
 
-# --- 2. Test ---
+# --- 3. Test ---
 if (-not $SkipTests) {
     Write-Host "==> Chay toan bo test..." -ForegroundColor Cyan
     & mvn -q test
@@ -52,13 +62,13 @@ if (-not $SkipTests) {
     }
 }
 
-# --- 3. Dat so phien ban vao pom ---
+# --- 4. Dat so phien ban vao pom ---
 Write-Host "==> Dat phien ban $Version vao pom..." -ForegroundColor Cyan
 & mvn -q versions:set "-DnewVersion=$Version" -DgenerateBackupPoms=false
 if ($LASTEXITCODE -ne 0) { throw "khong dat duoc phien ban" }
 
 try {
-    # --- 4. Dung hai ban ---
+    # --- 5. Dung hai ban ---
     if (Test-Path $releaseDir) { Remove-Item $releaseDir -Recurse -Force }
     New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
 
@@ -81,7 +91,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "dung ban portable that bai" }
     Copy-Item "dist\TuDienOffline-$Version-windows.zip" $releaseDir
 
-    # --- 5. Ma bam ---
+    # --- 6. Ma bam ---
     Write-Host "==> Tinh SHA256..." -ForegroundColor Cyan
     $lines = Get-ChildItem "$releaseDir\*.msi", "$releaseDir\*.zip" | ForEach-Object {
         $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
@@ -90,7 +100,7 @@ try {
     $lines | Set-Content (Join-Path $releaseDir "SHA256SUMS.txt") -Encoding UTF8
     $lines | ForEach-Object { Write-Host "    $_" }
 
-    # --- 6. Ghi chu phat hanh, cat tu CHANGELOG ---
+    # --- 7. Ghi chu phat hanh, cat tu CHANGELOG ---
     $changelog = Join-Path $root "CHANGELOG.md"
     if (Test-Path $changelog) {
         $all = Get-Content $changelog -Raw -Encoding UTF8
@@ -102,7 +112,7 @@ try {
         }
     }
 
-    # --- 7. Commit + gan the ---
+    # --- 8. Commit + gan the ---
     if (git status --porcelain) {
         git add -A
         git commit -q -m "chore: phat hanh $tag"
