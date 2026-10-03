@@ -194,7 +194,10 @@ toán ở `docs/PLAN.md`.
 | `anhviet109K.txt` | bộ từ điển Anh–Việt lưu hành trên mạng | **không rõ** |
 | Bảng thuật ngữ trong `data/` | tự soạn | theo mã nguồn |
 
-Xuất xứ và giấy phép của `anhviet109K.txt` chưa xác minh được. Vì vậy **chưa phát hành rộng
-rãi bản dựng sẵn**; dùng cá nhân và học tập. Ai muốn phát hành công khai thì nên thay bằng
-nguồn có giấy phép rõ ràng, ví dụ FreeDict `eng-vie` (GPL) — cổng `DictParser` đã chừa sẵn
-cho việc đó, thêm một nguồn không phải đụng vào `dict-core`.
+Xuất xứ và giấy phép của `anhviet109K.txt` **chưa xác minh được**. Bản dựng sẵn ở mục
+Releases phát hành cho mục đích cá nhân và học tập; nếu người giữ bản quyền dữ liệu có ý
+kiến thì sẽ gỡ xuống ngay.
+
+Dùng vào việc khác thì nên thay bằng nguồn có giấy phép rõ ràng, ví dụ FreeDict `eng-vie`
+(GPL). Cổng `DictParser` đã chừa sẵn cho việc đó: thêm một nguồn chỉ là viết thêm một class,
+không đụng vào `dict-core`.
