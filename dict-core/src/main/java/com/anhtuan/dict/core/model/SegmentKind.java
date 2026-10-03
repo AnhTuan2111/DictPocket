@@ -1,18 +1,16 @@
 package com.anhtuan.dict.core.model;
 
-/** Phan loai mot doan trong ket qua dich cau. */
-public enum SegmentKind {
-    /** Tu don tra duoc trong tu dien. */
+// Phân loại một đoạn trong kết quả dịch câu.
+public enum SegmentKind
+{
+    // Từ đơn tra được trong từ điển.
     WORD,
-    /** Cum nhieu tu khop longest-match ("give up", "about to"). */
+    // Cụm nhiều từ khớp longest-match ("give up", "about to").
     PHRASE,
-    /** Dau cau, khoang trang - giu nguyen, khong tra. */
+    // Dấu câu, khoảng trắng: giữ nguyên, không tra.
     PUNCT,
-    /** Khong tra duoc kem ca sau khi lemmatize - giu nguyen tu goc. */
+    // Không tra được kể cả sau khi lemmatize: giữ nguyên từ gốc.
     UNKNOWN,
-    /**
-     * Ca cau da duoc dich tron ven boi mot NMT engine.
-     * v1 khong sinh ra kind nay; danh san cho OnnxNmtEngine o v2 (PLAN.md 13).
-     */
+    // Cả câu đã được dịch trọn vẹn bởi một NMT engine; v1 không sinh kind này, để dành cho OnnxNmtEngine ở v2.
     TRANSLATED
 }

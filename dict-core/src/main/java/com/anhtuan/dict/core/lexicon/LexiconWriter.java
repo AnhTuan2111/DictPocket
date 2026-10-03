@@ -16,35 +16,38 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Ghi {@code lex.bin} theo dac ta {@link LexiconFormat}. */
-public final class LexiconWriter {
+// Ghi lex.bin theo định dạng trong LexiconFormat.
+public final class LexiconWriter
+{
 
-    private LexiconWriter() {}
+    private LexiconWriter()
+    {
+    }
 
-    /**
-     * Mot tu tieng Anh kem danh sach ban dich da xep theo xac suat giam dan.
-     *
-     * @param viTokens am tiet tieng Viet (phai nam trong {@code viVocabulary})
-     * @param probs    xac suat tuong ung, cung do dai voi {@code viTokens}
-     */
-    public record EnglishWord(String word, List<String> viTokens, List<Double> probs) {}
+    // Một từ tiếng Anh kèm danh sách bản dịch xếp theo xác suất giảm dần; probs cùng độ dài với viTokens,
+    // viTokens phải nằm trong viVocabulary.
+    public record EnglishWord(String word, List<String> viTokens, List<Double> probs)
+    {
+    }
 
-    public record Stats(int enCount, int viCount, long pairCount, long fileSize) {}
+    public record Stats(int enCount, int viCount, long pairCount, long fileSize)
+    {
+    }
 
-    /**
-     * @param viVocabulary toan bo am tiet tieng Viet duoc phep xuat hien, KHONG can sap xep
-     */
-    public static Stats write(Path target, List<EnglishWord> words, List<String> viVocabulary) {
-        // --- tu vung tieng Viet: sap xep de id = thu tu, tra cuu bang binary search ---
+    // viVocabulary là toàn bộ âm tiết tiếng Việt được phép xuất hiện, không cần sắp xếp.
+    public static Stats write(Path target, List<EnglishWord> words, List<String> viVocabulary)
+    {
+        // Từ vựng tiếng Việt: sắp xếp để id = thứ tự, tra cứu bằng binary search.
         List<String> vi = new ArrayList<>(viVocabulary);
         vi.sort(Utf8Compare.COMPARATOR);
         java.util.Map<String, Integer> viId = new java.util.HashMap<>(vi.size() * 2);
-        for (int i = 0; i < vi.size(); i++) viId.put(vi.get(i), i);
+        for (int i = 0; i < vi.size(); i++)
+            viId.put(vi.get(i), i);
 
         List<EnglishWord> en = new ArrayList<>(words);
         en.sort((a, b) -> Utf8Compare.COMPARATOR.compare(a.word(), b.word()));
 
-        // --- dung cac vung du lieu trong bo nho truoc, roi ghi mot luot ---
+        // Dựng các vùng dữ liệu trong bộ nhớ trước, rồi ghi một lượt.
         ByteArrayOutputStream enKeys = new ByteArrayOutputStream(en.size() * 10);
         int[] enKeyOffsets = new int[en.size()];
         ByteArrayOutputStream postings = new ByteArrayOutputStream(en.size() * 40);
@@ -52,21 +55,25 @@ public final class LexiconWriter {
         int[] postingCounts = new int[en.size()];
         long pairCount = 0;
 
-        for (int i = 0; i < en.size(); i++) {
+        for (int i = 0; i < en.size(); i++)
+        {
             EnglishWord w = en.get(i);
             enKeyOffsets[i] = enKeys.size();
             byte[] kb = w.word().getBytes(StandardCharsets.UTF_8);
             enKeys.write(kb, 0, kb.length);
             enKeys.write(0);
 
-            // Sap theo id tang dan de ma hoa delta; xac suat van doc duoc day du khi giai ma.
+            // Sắp theo id tăng dần để mã hóa delta; xác suất vẫn đọc đủ khi giải mã.
             List<int[]> entries = new ArrayList<>(w.viTokens().size());
-            for (int k = 0; k < w.viTokens().size(); k++) {
+            for (int k = 0; k < w.viTokens().size(); k++)
+            {
                 Integer id = viId.get(w.viTokens().get(k));
-                if (id == null) continue;
+                if (id == null)
+                    continue;
                 int q = LexiconFormat.quantize(w.probs().get(k));
-                if (q == 0) continue;
-                entries.add(new int[] {id, q});
+                if (q == 0)
+                    continue;
+                entries.add(new int[]{id, q});
             }
             entries.sort((a, b) -> Integer.compare(a[0], b[0]));
 
@@ -74,7 +81,8 @@ public final class LexiconWriter {
             postingCounts[i] = entries.size();
             pairCount += entries.size();
             int prev = 0;
-            for (int[] e : entries) {
+            for (int[] e : entries)
+            {
                 VarInt.write(postings, e[0] - prev);
                 postings.write(e[1] & 0xFF);
                 postings.write((e[1] >>> 8) & 0xFF);
@@ -84,7 +92,8 @@ public final class LexiconWriter {
 
         ByteArrayOutputStream viKeys = new ByteArrayOutputStream(vi.size() * 8);
         int[] viKeyOffsets = new int[vi.size()];
-        for (int i = 0; i < vi.size(); i++) {
+        for (int i = 0; i < vi.size(); i++)
+        {
             viKeyOffsets[i] = viKeys.size();
             byte[] kb = vi.get(i).getBytes(StandardCharsets.UTF_8);
             viKeys.write(kb, 0, kb.length);
@@ -102,12 +111,16 @@ public final class LexiconWriter {
         long postingsBase = viPtrOffset + (long) vi.size() * LexiconFormat.VI_PTR_SIZE;
 
         int topK = 0;
-        for (int n : postingCounts) topK = Math.max(topK, n);
+        for (int n : postingCounts)
+            topK = Math.max(topK, n);
 
-        try {
+        try
+        {
             Path parent = target.toAbsolutePath().getParent();
-            if (parent != null) Files.createDirectories(parent);
-            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(target), 1 << 16)) {
+            if (parent != null)
+                Files.createDirectories(parent);
+            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(target), 1 << 16))
+            {
                 ByteBuffer h = le(LexiconFormat.HEADER_SIZE);
                 h.put(LexiconFormat.MAGIC);
                 h.putInt(LexiconFormat.OFF_EN_COUNT, en.size());
@@ -122,7 +135,8 @@ public final class LexiconWriter {
                 out.write(enKeyBytes);
 
                 ByteBuffer ptrs = le(en.size() * LexiconFormat.EN_PTR_SIZE);
-                for (int i = 0; i < en.size(); i++) {
+                for (int i = 0; i < en.size(); i++)
+                {
                     ptrs.putInt(enKeyOffsets[i]);
                     ptrs.putInt(postingCounts[i]);
                     ptrs.putLong(postingsBase + postingOffsets[i]);
@@ -132,18 +146,22 @@ public final class LexiconWriter {
                 out.write(viKeyBytes);
 
                 ByteBuffer viPtrs = le(vi.size() * LexiconFormat.VI_PTR_SIZE);
-                for (int off : viKeyOffsets) viPtrs.putInt(off);
+                for (int off : viKeyOffsets)
+                    viPtrs.putInt(off);
                 out.write(viPtrs.array());
 
                 out.write(postingBytes);
             }
             return new Stats(en.size(), vi.size(), pairCount, Files.size(target));
-        } catch (IOException e) {
-            throw new UncheckedIOException("khong ghi duoc " + target, e);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException("cannot write " + target, e);
         }
     }
 
-    private static ByteBuffer le(int size) {
+    private static ByteBuffer le(int size)
+    {
         return ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
     }
 }

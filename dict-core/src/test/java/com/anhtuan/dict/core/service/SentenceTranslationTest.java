@@ -20,14 +20,10 @@ import static com.anhtuan.dict.core.TestEntries.sense;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Dich ca cau bang luat.
- *
- * <p>Tu dien rieng cho bo test nay, co chu chep lai ba cai bay that cua nguon:
- * {@code @school} co hai nhom danh tu ma nhom "đàn cá" dung truoc, {@code @reading} chi
- * co tu loai danh tu, va nghia nao cung la mot chum dong nghia dai loang ngoang.
- */
-class SentenceTranslationTest {
+// Từ điển riêng cho bộ test, chép lại ba cái bẫy thật của nguồn: @school có hai nhóm danh từ mà
+// "đàn cá" đứng trước, @reading chỉ có từ loại danh từ, và nghĩa nào cũng là chùm đồng nghĩa dài.
+class SentenceTranslationTest
+{
 
     @TempDir
     Path tmp;
@@ -35,164 +31,173 @@ class SentenceTranslationTest {
     private PackReader pack;
     private RuleBasedTranslationEngine engine;
 
-    private static List<Entry> dictionary() {
-        return List.of(
-                entry("go", "gou", List.of(sense("động từ", "đi, đi đến, đi tới")), List.of()),
+    private static List<Entry> dictionary()
+    {
+        return List.of(entry("go", "gou", List.of(sense("động từ", "đi, đi đến, đi tới")), List.of()),
                 entry("market", null, List.of(sense("danh từ", "chợ, thị trường")), List.of()),
                 entry("system", null, List.of(sense("danh từ", "hệ thống, mạng lưới")), List.of()),
                 entry("old", null, List.of(sense("tính từ", "già, cũ, xưa")), List.of()),
                 entry("book", null,
-                        List.of(sense("danh từ", "sách, quyển sách"),
-                                sense("động từ", "đặt trước, giữ chỗ")), List.of()),
+                        List.of(sense("danh từ", "sách, quyển sách"), sense("động từ", "đặt trước, giữ chỗ")),
+                        List.of()),
                 entry("good", null, List.of(sense("tính từ", "tốt, hay, lành")), List.of()),
                 entry("job", null, List.of(sense("danh từ", "việc, việc làm, công việc")), List.of()),
-                entry("give", "giv",
-                        List.of(sense("động từ", "cho, biếu, tặng")),
+                entry("give", "giv", List.of(sense("động từ", "cho, biếu, tặng")),
                         List.of(idiom("to give up", "bỏ, từ bỏ"))),
-                entry("work", null,
-                        List.of(sense("danh từ", "sự làm việc"),
-                                sense("động từ", "làm việc, hoạt động")), List.of()),
-                // Bay 1: nhom nghia it duoc viet ky dung TRUOC nhom hay dung
+                entry("work", null, List.of(sense("danh từ", "sự làm việc"), sense("động từ", "làm việc, hoạt động")),
+                        List.of()),
+                // Bẫy 1: nhóm nghĩa ít được viết kỹ đứng trước nhóm hay dùng.
                 entry("school", null,
                         List.of(sense("danh từ", "đàn cá", "bầy cá"),
                                 sense("danh từ", "trường học", "học đường", "trường sở", "buổi học")),
                         List.of()),
-                // Bay 2: dang chia co muc tu rieng va chi mang tu loai danh tu
+                // Bẫy 2: dạng chia có mục riêng và chỉ mang từ loại danh từ.
                 entry("reading", null, List.of(sense("danh từ", "sự đọc, sự đọc sách")), List.of()),
                 entry("read", null, List.of(sense("động từ", "đọc, đọc sách")), List.of()),
-                // Bay 3: cum nhieu tu la DANH TU, khong phai cum dong tu nhu trong nguon 109K
+                // Bẫy 3: cụm nhiều từ là danh từ, không phải cụm động từ.
                 entry("use case", null, List.of(sense("danh từ", "ca sử dụng")), List.of()));
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         Path file = tmp.resolve("dict.pack");
         PackWriter.write(file, dictionary());
         pack = PackReader.open(file);
         LookupService lookup = new LookupService(pack);
-        engine = new RuleBasedTranslationEngine(
-                new DictionaryGlossEngine(lookup, pack.multiWordStarters()), lookup);
+        engine = new RuleBasedTranslationEngine(new DictionaryGlossEngine(lookup, pack.multiWordStarters()), lookup);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         pack.close();
     }
 
-    private String translate(String sentence) {
+    private String translate(String sentence)
+    {
         var segments = engine.translate(sentence);
-        assertEquals(1, segments.size(), "engine dich ca cau phai tra ve DUNG mot doan");
+        assertEquals(1, segments.size(), "a whole-sentence engine must return exactly one segment");
         assertEquals(SegmentKind.TRANSLATED, segments.getFirst().kind());
         return segments.getFirst().displayGloss();
     }
 
     @Test
-    @DisplayName("trật tự danh ngữ đảo ngược: the old system -> hệ thống cũ")
-    void nounPhraseIsReordered() {
-        // Mao tu bien mat, tinh tu ra sau danh tu - hai khac biet lon nhat giua hai thu tieng.
+    @DisplayName("noun phrase order is reversed: the old system -> hệ thống cũ")
+    void nounPhraseIsReordered()
+    {
+        // Mạo từ biến mất, tính từ ra sau danh từ: hai khác biệt lớn nhất giữa hai thứ tiếng.
         assertEquals("Hệ thống già", translate("The old system"));
         assertEquals("Sách này", translate("This book"));
     }
 
     @Test
-    @DisplayName("sở hữu ra sau danh từ: his job -> việc của anh ấy")
-    void possessiveMovesAfterNoun() {
-        assertTrue(translate("He gave up his job").contains("việc của anh ấy"),
-                translate("He gave up his job"));
+    @DisplayName("possessive moves after the noun: his job -> việc của anh ấy")
+    void possessiveMovesAfterNoun()
+    {
+        assertTrue(translate("He gave up his job").contains("việc của anh ấy"), translate("He gave up his job"));
     }
 
     @Test
-    @DisplayName("thì quá khứ sinh ra chữ \"đã\"")
-    void pastTenseAddsMarker() {
+    @DisplayName("past tense produces \"đã\"")
+    void pastTenseAddsMarker()
+    {
         assertEquals("Anh ấy đã đi đến chợ", translate("He went to the market"));
     }
 
     @Test
-    @DisplayName("phủ định gộp với động từ tình thái: could not -> không thể")
-    void negationMergesWithModal() {
+    @DisplayName("negation merges with the modal verb: could not -> không thể")
+    void negationMergesWithModal()
+    {
         assertTrue(translate("The system could not work").startsWith("Hệ thống không thể"),
                 translate("The system could not work"));
     }
 
     @Test
-    @DisplayName("chọn nghĩa theo từ loại: work sau \"could not\" là động từ")
-    void partOfSpeechDecidesTheMeaning() {
+    @DisplayName("sense chosen by part of speech: work after \"could not\" is a verb")
+    void partOfSpeechDecidesTheMeaning()
+    {
         assertTrue(translate("The system could not work").endsWith("làm việc"),
-                "phai lay nghia dong tu \"làm việc\", khong phai danh tu \"sự làm việc\"");
+                "must pick the verb sense \"làm việc\", not the noun \"sự làm việc\"");
     }
 
     @Test
-    @DisplayName("câu mệnh lệnh: từ đầu câu có nghĩa động từ thì là động từ")
-    void sentenceInitialWordIsImperative() {
-        // Van phong de bai va tai lieu ky thuat gan nhu toan cau menh lenh. Khong co luat nay
-        // thi "Book" lay nghia danh tu "sách".
+    @DisplayName("imperative: a sentence-initial word with a verb sense is a verb")
+    void sentenceInitialWordIsImperative()
+    {
+        // Đề bài và tài liệu kỹ thuật gần như toàn câu mệnh lệnh; thiếu luật này "Book" ra "sách".
         assertEquals("Đặt trước chợ", translate("Book the market"));
     }
 
     @Test
-    @DisplayName("liệt kê động từ: vế sau dấu phẩy và \"and\" cũng là động từ")
-    void verbListKeepsVerbSense() {
-        // "work" sau dau phay phai lay nghia dong tu "làm việc", khong phai "sự làm việc".
+    @DisplayName("verb list: items after the comma and \"and\" are verbs too")
+    void verbListKeepsVerbSense()
+    {
+        // "work" sau dấu phẩy phải lấy nghĩa động từ "làm việc", không phải "sự làm việc".
         assertEquals("Đọc, làm việc, và đặt trước", translate("Read, work, and book"));
     }
 
     @Test
-    @DisplayName("số đếm đứng trước danh từ và không bị tra từ điển")
-    void numeralsStayBeforeTheNoun() {
-        // "four" khong co trong bang hu tu thi bi tra nguon 109K va ra nghia co
-        // "chứng khoán lãi 4 qịu" - da do that tren tai lieu.
+    @DisplayName("numerals precede the noun and are not looked up")
+    void numeralsStayBeforeTheNoun()
+    {
+        // "four" không có trong bảng từ chức năng thì bị tra nguồn và ra "chứng khoán lãi 4 qịu".
         assertEquals("Bốn sách", translate("The four books"));
     }
 
     @Test
-    @DisplayName("cấp so sánh: older -> già hơn")
-    void comparativeAddsMarker() {
-        // Lemmatizer cat duoi -er de tra duoc tu dien, nen nghia tra ra mat han y so sanh.
+    @DisplayName("comparative: older -> già hơn")
+    void comparativeAddsMarker()
+    {
+        // Lemmatizer cắt đuôi -er để tra từ điển nên nghĩa tra ra mất ý so sánh.
         assertEquals("Hệ thống già hơn", translate("The older system"));
     }
 
     @Test
-    @DisplayName("including là giới từ, không phải tính từ bổ nghĩa")
-    void participialPrepositionStaysBeforeItsObject() {
-        // Tu dien ghi "including" la tinh tu, de nguyen thi buoc sap lai danh ngu day no ra
-        // sau danh tu: "gồm cả việc" thanh "việc gồm cả".
+    @DisplayName("including is a preposition, not a modifying adjective")
+    void participialPrepositionStaysBeforeItsObject()
+    {
+        // Từ điển ghi "including" là tính từ; để nguyên thì sắp lại danh ngữ đẩy nó ra sau danh từ
+        // ("gồm cả việc" thành "việc gồm cả").
         assertEquals("Sách gồm cả việc", translate("The book including the job"));
     }
 
     @Test
-    @DisplayName("cụm nhiều từ mang từ loại danh từ thì tham gia sắp lại danh ngữ")
-    void multiWordNounJoinsNounPhraseReorder() {
-        // Truoc day moi cum nhieu tu bi coi la cum dong tu, nen tinh tu khong duoc day ra sau.
+    @DisplayName("multi-word nouns take part in noun phrase reordering")
+    void multiWordNounJoinsNounPhraseReorder()
+    {
+        // Nếu coi mọi cụm nhiều từ là cụm động từ thì tính từ không được đẩy ra sau.
         assertEquals("Ca sử dụng tốt", translate("A good use case"));
     }
 
     @Test
-    @DisplayName("nhóm nghĩa được từ điển viết kỹ hơn thắng: school -> trường học")
-    void richerSenseWins() {
-        // Neu lay theo thu tu file thi ra "đàn cá" - dung nghia tu dien nhung sai y nguoi dung.
-        assertTrue(translate("He went to school").contains("trường học"),
-                translate("He went to school"));
+    @DisplayName("the better-documented sense group wins: school -> trường học")
+    void richerSenseWins()
+    {
+        // Theo thứ tự file thì ra "đàn cá": đúng nghĩa từ điển nhưng sai ý người dùng.
+        assertTrue(translate("He went to school").contains("trường học"), translate("He went to school"));
     }
 
     @Test
-    @DisplayName("is + V-ing -> \"đang\", lùi về nguyên thể để lấy nghĩa động từ")
-    void progressiveFallsBackToLemma() {
-        // "@reading" chi co tu loai danh tu ("sự đọc") nen phai lui ve "read".
+    @DisplayName("is + V-ing -> \"đang\", falling back to the base form to get the verb sense")
+    void progressiveFallsBackToLemma()
+    {
+        // "@reading" chỉ có từ loại danh từ ("sự đọc") nên phải lùi về "read".
         assertEquals("Anh ấy đang đọc sách", translate("He is reading a book"));
     }
 
     @Test
-    @DisplayName("cụm động từ vẫn được nhận và vẫn nhận dấu hiệu thì")
-    void phrasalVerbKeepsWorking() {
-        assertTrue(translate("He gave up his job").startsWith("Anh ấy đã bỏ"),
-                translate("He gave up his job"));
+    @DisplayName("phrasal verbs are still recognized and still carry tense markers")
+    void phrasalVerbKeepsWorking()
+    {
+        assertTrue(translate("He gave up his job").startsWith("Anh ấy đã bỏ"), translate("He gave up his job"));
     }
 
     @Test
-    @DisplayName("một dòng nghĩa được tách thành từng phương án riêng")
-    void glossAlternativesAreSplit() {
-        // Bang xac suat cham diem TUNG phuong an, nen phai tach ra truoc. Phuong an dau
-        // cua tu dien khong phai luc nao cung la phuong an dung.
+    @DisplayName("one gloss line is split into separate candidates")
+    void glossAlternativesAreSplit()
+    {
+        // Bảng xác suất chấm TỪNG phương án nên phải tách ra trước; phương án đầu chưa chắc đúng.
         assertEquals(List.of("cho", "biếu", "tặng", "ban"),
                 RuleBasedTranslationEngine.alternatives("cho, biếu, tặng, ban"));
         assertEquals(List.of("loại a", "hạng nhất"),
@@ -201,17 +206,19 @@ class SentenceTranslationTest {
     }
 
     @Test
-    @DisplayName("nghĩa dài được rút còn phương án đầu")
-    void longGlossesAreShortened() {
+    @DisplayName("a long gloss is cut down to the first candidate")
+    void longGlossesAreShortened()
+    {
         assertEquals("sách", RuleBasedTranslationEngine.shorten("sách, quyển sách"));
         assertEquals("giữ vững", RuleBasedTranslationEngine.shorten("giữ vững, giữ không cho đổ"));
         assertEquals("loại a", RuleBasedTranslationEngine.shorten("(thông tục) loại a, hạng nhất"));
     }
 
     @Test
-    @DisplayName("từ chức năng dịch cứng, không lấy nghĩa từ điển")
-    void functionWordsBypassTheDictionary() {
-        // Chinh xac cai bay o muc tu "@he": nghia duoc viet ky nhat lai la "đàn ông, con đực".
+    @DisplayName("function words are translated by rule, not by dictionary sense")
+    void functionWordsBypassTheDictionary()
+    {
+        // Đúng cái bẫy ở "@he": nghĩa được viết kỹ nhất lại là "đàn ông, con đực".
         assertTrue(translate("He went to the market").startsWith("Anh ấy"));
         assertEquals("go", TextNormalizer.normalizeHeadword("Go"));
     }

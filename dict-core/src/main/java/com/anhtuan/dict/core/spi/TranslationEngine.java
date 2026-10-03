@@ -3,34 +3,27 @@ package com.anhtuan.dict.core.spi;
 import com.anhtuan.dict.core.model.Segment;
 import java.util.List;
 
-/**
- * CONG MO RONG SO 2 - cho phep cam NMT vao sau nay ma khong dap kien truc (PLAN.md 13).
- *
- * v1: DictionaryGlossEngine  - tra nhieu Segment (chu giai theo cum)
- * v2: OnnxNmtEngine          - tra MOT Segment kind=TRANSLATED (cau dich tu nhien)
- *
- * UI chi lam viec voi interface nay nen doi engine khong phai sua UI.
- */
-public interface TranslationEngine {
+// Cổng mở rộng số 2: cho phép cắm NMT vào sau này mà không đập kiến trúc. UI chỉ làm việc với interface này.
+// v1 DictionaryGlossEngine trả nhiều Segment (chú giải theo cụm); v2 OnnxNmtEngine trả một Segment kind=TRANSLATED.
+public interface TranslationEngine
+{
 
-    /** Ma engine, dung trong cau hinh va log. */
+    // Mã engine, dùng trong cấu hình và log.
     String engineId();
 
-    /** Ten hien cho nguoi dung chon trong UI. */
-    default String displayName() {
+    // Tên hiển thị cho người dùng chọn trong UI.
+    default String displayName()
+    {
         return engineId();
     }
 
-    /**
-     * Dich mot cau tieng Anh sang tieng Viet.
-     *
-     * @return danh sach segment phu kin chuoi goc theo thu tu offset tang dan.
-     *         Noi sourceText cua tat ca segment lai phai ra dung chuoi dau vao.
-     */
+    // Dịch một câu tiếng Anh sang tiếng Việt. Trả về các segment phủ kín chuỗi gốc theo thứ tự offset tăng dần;
+    // nối sourceText của tất cả segment lại phải ra đúng chuỗi đầu vào.
     List<Segment> translate(String sentence);
 
-    /** Engine da san sang chua (NMT can nap model, co the that bai). */
-    default boolean isAvailable() {
+    // Engine đã sẵn sàng chưa (NMT cần nạp model, có thể thất bại).
+    default boolean isAvailable()
+    {
         return true;
     }
 }

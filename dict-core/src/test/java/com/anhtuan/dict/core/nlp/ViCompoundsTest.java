@@ -17,19 +17,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Danh sach tu ghep tieng Viet rut ra tu chinh tu dien (PLAN.md 7.5). */
-class ViCompoundsTest {
+class ViCompoundsTest
+{
 
     @TempDir
     Path tmp;
 
-    private static Entry withGlosses(String headword, String... glosses) {
-        return entry(headword, null, List.of(new Sense("động từ", List.of(glosses), List.of())),
-                List.of());
+    private static Entry withGlosses(String headword, String... glosses)
+    {
+        return entry(headword, null, List.of(new Sense("động từ", List.of(glosses), List.of())), List.of());
     }
 
-    /** Muoi muc tu, trong do "chăm sóc" lap lai 3 lan con "linh tinh quá" chi 1 lan. */
-    private static List<Entry> dictionary() {
+    // Bốn mục: "chăm sóc" lặp 3 lần, "linh tinh quá" chỉ 1 lần.
+    private static List<Entry> dictionary()
+    {
         List<Entry> out = new ArrayList<>();
         out.add(withGlosses("care", "trông nom, chăm sóc"));
         out.add(withGlosses("tend", "chăm sóc, săn sóc"));
@@ -39,48 +40,51 @@ class ViCompoundsTest {
     }
 
     @Test
-    @DisplayName("phương án lặp lại nhiều lần mới được coi là từ ghép")
-    void onlyRepeatedAlternativesBecomeWords() {
+    @DisplayName("only alternatives repeated often enough count as compounds")
+    void onlyRepeatedAlternativesBecomeWords()
+    {
         Set<String> words = IndexWriter.mineCompounds(dictionary(), 3);
-        assertTrue(words.contains("chăm sóc"), "xuat hien 3 lan -> la tu ghep");
-        assertFalse(words.contains("linh tinh quá"), "xuat hien 1 lan -> chi la cum ngau nhien");
-        assertFalse(words.contains("trông nom"), "xuat hien 1 lan");
+        assertTrue(words.contains("chăm sóc"), "appears 3 times -> compound");
+        assertFalse(words.contains("linh tinh quá"), "appears once -> just a random phrase");
+        assertFalse(words.contains("trông nom"), "appears once");
     }
 
     @Test
-    @DisplayName("gộp âm tiết thành từ, giữ nguyên cả âm tiết rời")
-    void expandKeepsSyllablesAndAddsCompounds() {
+    @DisplayName("merges syllables into words while keeping the loose syllables")
+    void expandKeepsSyllablesAndAddsCompounds()
+    {
         ViCompounds words = ViCompounds.of(Set.of("chăm sóc", "sự chăm sóc"));
         List<String> out = words.expand(List.of("sự", "chăm", "sóc"));
-        assertTrue(out.containsAll(List.of("sự", "chăm", "sóc")), "am tiet roi phai con");
+        assertTrue(out.containsAll(List.of("sự", "chăm", "sóc")), "loose syllables must remain");
         assertTrue(out.contains("chăm_sóc"));
-        // Khop TAT CA chu khong chi cum dai nhat: nguoi go "chăm sóc" van phai tim ra
-        // muc tu ghi "sự chăm sóc".
+        // Khớp TẤT CẢ chứ không chỉ cụm dài nhất: gõ "chăm sóc" vẫn phải tìm ra "sự chăm sóc".
         assertTrue(out.contains("sự_chăm_sóc"));
     }
 
     @Test
-    @DisplayName("gõ sai chính tả tiếng Việt thì đoán ra từ đúng")
-    void suggestsCorrectionForTypos() {
+    @DisplayName("a Vietnamese typo suggests the correct word")
+    void suggestsCorrectionForTypos()
+    {
         ViCompounds words = ViCompounds.of(Set.of("chăm sóc", "ngân hàng", "nghiên cứu"));
-        // Truoc khi co ham nay, go "cham sok" tra ve slow / sculp / shock va nguoi dung
-        // khong he biet minh go sai o dau.
+        // Trước khi có hàm này, gõ "cham sok" ra slow / sculp / shock.
         assertEquals(List.of("chăm sóc"), words.suggest("cham sok", 3));
         assertEquals(List.of("ngân hàng"), words.suggest("ngan hag", 3));
     }
 
     @Test
-    @DisplayName("gõ đúng thì không gợi ý gì")
-    void noSuggestionWhenQueryIsCorrect() {
+    @DisplayName("a correct query yields no suggestion")
+    void noSuggestionWhenQueryIsCorrect()
+    {
         ViCompounds words = ViCompounds.of(Set.of("chăm sóc"));
         assertTrue(words.suggest("chăm sóc", 3).isEmpty());
-        assertTrue(words.suggest("cham soc", 3).isEmpty(), "go khong dau van la go dung");
-        assertTrue(words.suggest("sóc", 3).isEmpty(), "mot am tiet thi khong doan");
+        assertTrue(words.suggest("cham soc", 3).isEmpty(), "accent-free input still counts as correct");
+        assertTrue(words.suggest("sóc", 3).isEmpty(), "a single syllable is not guessed");
     }
 
     @Test
-    @DisplayName("ghi ra rồi đọc lại đúng danh sách")
-    void roundTrip() {
+    @DisplayName("written list reads back identically")
+    void roundTrip()
+    {
         Path file = tmp.resolve(ViCompounds.FILE_NAME);
         ViCompounds.write(file, Set.of("chăm sóc", "ngân hàng"));
         ViCompounds loaded = ViCompounds.loadIfPresent(file);
@@ -89,6 +93,6 @@ class ViCompoundsTest {
 
         ViCompounds missing = ViCompounds.loadIfPresent(tmp.resolve("khong-co.txt"));
         assertFalse(missing.isAvailable());
-        assertEquals(List.of("a", "b"), missing.expand(List.of("a", "b")), "ban rong khong doi gi");
+        assertEquals(List.of("a", "b"), missing.expand(List.of("a", "b")), "an empty list changes nothing");
     }
 }

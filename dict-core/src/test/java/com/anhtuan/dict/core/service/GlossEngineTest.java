@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Chu giai cau theo cum (PLAN.md 8.1, tieu chi nghiem thu M4). */
-class GlossEngineTest {
+class GlossEngineTest
+{
 
     @TempDir
     Path tmp;
@@ -28,7 +28,8 @@ class GlossEngineTest {
     private DictionaryGlossEngine engine;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         Path file = tmp.resolve("dict.pack");
         PackWriter.write(file, TestEntries.mini());
         pack = PackReader.open(file);
@@ -36,29 +37,32 @@ class GlossEngineTest {
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         pack.close();
     }
 
-    private Segment segmentOf(List<Segment> segments, String source) {
-        return segments.stream()
-                .filter(s -> s.sourceText().equalsIgnoreCase(source))
-                .findFirst().orElseThrow(() -> new AssertionError("khong co doan \"" + source + "\""));
+    private Segment segmentOf(List<Segment> segments, String source)
+    {
+        return segments.stream().filter(s -> s.sourceText().equalsIgnoreCase(source)).findFirst()
+                .orElseThrow(() -> new AssertionError("no segment \"" + source + "\""));
     }
 
     @Test
-    @DisplayName("\"He gave up his job\" nhan ra cum give up qua bi danh + lemma")
-    void recognisesPhrasalVerbInPastTense() {
+    @DisplayName("\"He gave up his job\" recognises the phrase give up via inflection + lemma")
+    void recognisesPhrasalVerbInPastTense()
+    {
         List<Segment> segments = engine.translate("He gave up his job.");
         Segment phrase = segmentOf(segments, "gave up");
         assertEquals(SegmentKind.PHRASE, phrase.kind());
         assertEquals("bỏ, từ bỏ", phrase.displayGloss());
-        assertTrue(phrase.candidates().size() > 1, "phai co nghia thay the de nguoi dung doi");
+        assertTrue(phrase.candidates().size() > 1, "alternative glosses must exist so the user can switch");
     }
 
     @Test
-    @DisplayName("longest-match: \"look after\" khong bi cat thanh look + after")
-    void longestMatchWins() {
+    @DisplayName("longest-match: \"look after\" is not split into look + after")
+    void longestMatchWins()
+    {
         List<Segment> segments = engine.translate("She looks after them");
         Segment phrase = segmentOf(segments, "looks after");
         assertEquals(SegmentKind.PHRASE, phrase.kind());
@@ -66,9 +70,10 @@ class GlossEngineTest {
     }
 
     @Test
-    @DisplayName("muc tu chi co tham chieu cheo van phai ra nghia: went -> go")
-    void crossReferenceOnlyEntryFallsThroughToLemma() {
-        // "@went" ton tai nhung khong co dong nghia nao. Neu dung lai o day thi UI in ra o trong.
+    @DisplayName("a cross-reference-only entry still yields a gloss: went -> go")
+    void crossReferenceOnlyEntryFallsThroughToLemma()
+    {
+        // "@went" tồn tại nhưng không có dòng nghĩa nào; dừng ở đây thì UI in ra ô trống.
         Segment went = segmentOf(engine.translate("She went home"), "went");
         assertEquals(SegmentKind.WORD, went.kind());
         assertNotNull(went.displayGloss());
@@ -76,20 +81,23 @@ class GlossEngineTest {
     }
 
     @Test
-    @DisplayName("\"about to\" khong co trong nguon -> tra rieng tung tu, khong loi")
-    void missingPhraseDegradesGracefully() {
+    @DisplayName("\"about to\" is absent from the source -> looked up word by word without error")
+    void missingPhraseDegradesGracefully()
+    {
         List<Segment> segments = engine.translate("He is about to leave");
         assertTrue(segments.stream().noneMatch(s -> s.kind() == SegmentKind.PHRASE));
         assertEquals(SegmentKind.UNKNOWN, segmentOf(segments, "about").kind());
     }
 
     @Test
-    @DisplayName("BAT BIEN: cac doan phu kin cau goc theo dung offset")
-    void segmentsTileTheSourceExactly() {
+    @DisplayName("Invariant: segments tile the source sentence at exact offsets")
+    void segmentsTileTheSourceExactly()
+    {
         String sentence = "He gave up his job, then went home.";
         StringBuilder sb = new StringBuilder();
         int expectedStart = 0;
-        for (Segment s : engine.translate(sentence)) {
+        for (Segment s : engine.translate(sentence))
+        {
             assertEquals(expectedStart, s.startOffset());
             assertEquals(s.sourceText(), sentence.substring(s.startOffset(), s.endOffset()));
             expectedStart = s.endOffset();
@@ -99,8 +107,9 @@ class GlossEngineTest {
     }
 
     @Test
-    @DisplayName("tu khong co trong tu dien giu nguyen, khong nem exception")
-    void unknownWordsAreKept() {
+    @DisplayName("a word missing from the dictionary is kept as is, no exception")
+    void unknownWordsAreKept()
+    {
         Segment seg = segmentOf(engine.translate("zzzblah"), "zzzblah");
         assertEquals(SegmentKind.UNKNOWN, seg.kind());
         assertTrue(seg.candidates().isEmpty());

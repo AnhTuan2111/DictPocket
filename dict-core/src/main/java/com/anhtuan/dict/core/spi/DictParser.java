@@ -4,29 +4,18 @@ import com.anhtuan.dict.core.model.Entry;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-/**
- * CONG MO RONG SO 1 - "bo sung tai lieu" (PLAN.md F5, M7).
- *
- * Them mot dinh dang tu dien moi (StarDict, CSV, TSV, JSON...) chi can
- * viet mot class implement interface nay. KHONG duoc sua gi trong dict-core.
- *
- * Tra ve Stream chu khong phai List: file nguon co the rat lon (15 MB / 108k entry),
- * doc lazy giup importer khong phai giu toan bo trong RAM.
- */
-public interface DictParser {
+// Cổng mở rộng số 1: thêm định dạng từ điển mới (StarDict, CSV, TSV, JSON...) chỉ cần viết một class implement interface này,
+// không sửa dict-core. Trả Stream chứ không phải List vì file nguồn có thể rất lớn (15 MB / 108k entry), đọc lazy để không giữ hết trong RAM.
+public interface DictParser
+{
 
-    /** Ten dinh dang, dung trong CLI va metadata nguon. Vi du "anhviet109k". */
+    // Tên định dạng, dùng trong CLI và metadata nguồn; ví dụ "anhviet109k".
     String formatId();
 
-    /** Doan xem parser nay co xu ly duoc file hay khong (dua vao duoi file / vai dong dau). */
+    // Đoán parser này có xử lý được file hay không (dựa vào đuôi file / vài dòng đầu).
     boolean canParse(Path source);
 
-    /**
-     * Doc file nguon thanh cac Entry.
-     * KHONG duoc throw khi gap dong loi dinh dang - phai bo qua va ghi log
-     * (PLAN.md 4.2 quy tac 9). Chi throw khi khong doc duoc file.
-     *
-     * @return stream lazy; nguoi goi phai dong bang try-with-resources
-     */
+    // Đọc file nguồn thành các Entry. Không được throw khi gặp dòng lỗi định dạng: phải bỏ qua và ghi log;
+    // chỉ throw khi không đọc được file. Stream lazy, người gọi phải đóng bằng try-with-resources.
     Stream<Entry> parse(Path source, int sourceId);
 }

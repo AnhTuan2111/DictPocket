@@ -13,34 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Dich CA CAU Anh -&gt; Viet bang luat, dua tren ket qua chu giai cua
- * {@link DictionaryGlossEngine}.
- *
- * <h2>Day la gi va KHONG phai la gi</h2>
- * Day la dich may dua tren luat: chon nghia theo tu loai, dich cung tu chuc nang, roi sap
- * lai trat tu tu cho dung tieng Viet. No cho ra cau doc duoc voi cau tran thuat thong thuong,
- * va se sai voi cau phuc tap, thanh ngu, hay cau nhieu menh de long nhau.
- * No KHONG phai dich may no-ron - muon chat luong do thi phai cam mot model NMT vao dung
- * cai cong {@link TranslationEngine} nay (PLAN.md muc 14).
- *
- * <h2>Ba viec no lam, theo thu tu</h2>
- * <ol>
- *   <li><b>Tu chuc nang</b> tra bang {@link FunctionWords} thay vi tra tu dien. Tu dien dich
- *       {@code he} thanh "nó, anh ấy, ông ấy... (chỉ người và động vật giống đực)" - nhet
- *       nguyen chuoi do vao cau thi khong con gi doc duoc.</li>
- *   <li><b>Chon nghia theo tu loai.</b> Tu dien da ghi san tu loai cho tung nhom nghia;
- *       chi can doan dung tu loai trong ngu canh la chon duoc nghia dung. {@code old} trong
- *       "the old system" phai lay nghia tinh tu ("cũ") chu khong phai danh tu ("thời xưa").</li>
- *   <li><b>Sap lai trat tu.</b> Tieng Anh la DANH NGU nguoc voi tieng Viet:
- *       {@code the old system} -&gt; "hệ thống cũ", {@code his job} -&gt; "công việc của anh ấy".
- *       Them dau hieu thi: {@code gave} -&gt; "đã ...", {@code will} -&gt; "sẽ ...".</li>
- * </ol>
- *
- * <p>Tra ve DUNG MOT {@link Segment} kind = {@link SegmentKind#TRANSLATED}, dung nhu giao uoc
- * ma {@link TranslationEngine} dat ra cho engine dich nguyen cau.
- */
-public final class RuleBasedTranslationEngine implements TranslationEngine {
+// Dịch cả câu Anh->Việt bằng luật, dựa trên kết quả của DictionaryGlossEngine: dịch cứng từ
+// chức năng (FunctionWords), chọn nghĩa theo từ loại, rồi sắp lại trật tự cho đúng tiếng Việt
+// (danh ngữ ngược, thêm dấu hiệu thì). Đọc được với câu trần thuật thông thường, sai với câu
+// phức/thành ngữ; muốn chất lượng hơn thì cắm NMT vào TranslationEngine.
+// Trả về đúng một Segment kind TRANSLATED theo giao ước của TranslationEngine.
+public final class RuleBasedTranslationEngine implements TranslationEngine
+{
 
     public static final String ENGINE_ID = "rule-based-vi";
 
@@ -48,35 +27,39 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
     private final LookupService lookup;
     private final LexicalPrior prior;
 
-    public RuleBasedTranslationEngine(DictionaryGlossEngine glossEngine, LookupService lookup) {
+    public RuleBasedTranslationEngine(DictionaryGlossEngine glossEngine, LookupService lookup)
+    {
         this(glossEngine, lookup, LexicalPrior.empty());
     }
 
-    /**
-     * @param prior bang xac suat dich tu hoc tu kho song ngu. Thieu no thi engine van chay,
-     *              chi chon nghia kem hon - xem {@link #pickBest}.
-     */
-    public RuleBasedTranslationEngine(DictionaryGlossEngine glossEngine, LookupService lookup,
-                                      LexicalPrior prior) {
+    // Thiếu prior thì engine vẫn chạy, chỉ chọn nghĩa kém hơn (xem pickBest).
+    public RuleBasedTranslationEngine(DictionaryGlossEngine glossEngine, LookupService lookup, LexicalPrior prior)
+    {
         this.glossEngine = glossEngine;
         this.lookup = lookup;
         this.prior = prior;
     }
 
     @Override
-    public String engineId() {
+    public String engineId()
+    {
         return ENGINE_ID;
     }
 
     @Override
-    public String displayName() {
+    public String displayName()
+    {
         return "Dịch câu bằng luật (thử nghiệm)";
     }
 
-    /** Tu loai da doan cho tung doan. */
-    private enum Pos { NOUN, VERB, ADJ, ADV, FUNC, PUNCT, UNKNOWN }
+    // Từ loại đã đoán cho từng đoạn.
+    private enum Pos
+    {
+        NOUN, VERB, ADJ, ADV, FUNC, PUNCT, UNKNOWN
+    }
 
-    private static final class Item {
+    private static final class Item
+    {
         String source;
         String vi;
         Pos pos = Pos.UNKNOWN;
@@ -85,23 +68,30 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
         boolean past;
         boolean gerund;
         boolean dropped;
-        /** Da nuot chu "not" cua tu ben canh - tu nay khong duoc bo di nua. */
+        // Đã nuốt chữ "not" ở cạnh, từ này không được bỏ đi nữa.
         boolean negated;
 
-        boolean isFunc(FunctionWords.Category... cats) {
-            if (fw == null) return false;
-            for (FunctionWords.Category c : cats) if (fw.cat() == c) return true;
+        boolean isFunc(FunctionWords.Category... cats)
+        {
+            if (fw == null)
+                return false;
+            for (FunctionWords.Category c : cats)
+                if (fw.cat() == c)
+                    return true;
             return false;
         }
 
-        boolean isContent() {
+        boolean isContent()
+        {
             return fw == null && pos != Pos.PUNCT;
         }
     }
 
     @Override
-    public List<Segment> translate(String sentence) {
-        if (sentence == null || sentence.isBlank()) return List.of();
+    public List<Segment> translate(String sentence)
+    {
+        if (sentence == null || sentence.isBlank())
+            return List.of();
 
         List<Item> items = toItems(glossEngine.translate(sentence));
         assignPartOfSpeech(items);
@@ -114,19 +104,22 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
                 List.of(new Candidate(sentence, vi, null, 1.0))));
     }
 
-    /** Ban chu giai tung cum - UI hien duoi cau dich de nguoi dung doi chieu va sua. */
-    public List<Segment> glossSegments(String sentence) {
+    // Bản chú giải từng cụm: UI hiện dưới câu dịch để người dùng đối chiếu và sửa.
+    public List<Segment> glossSegments(String sentence)
+    {
         return glossEngine.translate(sentence);
     }
 
-    // ------------------------------------------------------------------ buoc 1: doc segment
-
-    private static List<Item> toItems(List<Segment> segments) {
+    private static List<Item> toItems(List<Segment> segments)
+    {
         List<Item> items = new ArrayList<>(segments.size());
-        for (Segment s : segments) {
+        for (Segment s : segments)
+        {
             String text = s.sourceText();
-            if (s.kind() == SegmentKind.PUNCT) {
-                if (text.isBlank()) continue;                 // khoang trang tu sinh lai luc noi
+            if (s.kind() == SegmentKind.PUNCT)
+            {
+                if (text.isBlank())
+                    continue; // khoảng trắng tự sinh lại lúc nối
                 Item it = new Item();
                 it.source = text.trim();
                 it.vi = text.trim();
@@ -141,37 +134,34 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
             String firstWord = text.split("\\s+")[0];
             it.past = Lemmatizer.isPastForm(firstWord);
             it.gerund = firstWord.toLowerCase(Locale.ROOT).endsWith("ing");
-            // Cum nhieu tu: cu tin tu loai tu dien da ghi. Truoc day cho tat ca la dong tu vi
-            // nguon 109K chi co cum dong tu, nhung bang thuat ngu tu soan toan la DANH TU cum
-            // ("design pattern", "use case"). Coi la dong tu thi buoc sap lai danh ngu bo qua,
-            // ra "Đề xuất phù hợp mẫu thiết kế" thay vi "Đề xuất mẫu thiết kế phù hợp".
-            if (s.kind() == SegmentKind.PHRASE) {
-                it.pos = hasPos(it, "động từ") ? Pos.VERB
-                        : hasPos(it, "danh từ") ? Pos.NOUN : Pos.VERB;
+            // Cụm nhiều từ: tin từ loại từ điển đã ghi. Bảng thuật ngữ tự soạn toàn danh từ cụm
+            // ("design pattern"); coi là động từ thì bước sắp lại danh ngữ bỏ qua, ra "Đề xuất
+            // phù hợp mẫu thiết kế" thay vì "Đề xuất mẫu thiết kế phù hợp".
+            if (s.kind() == SegmentKind.PHRASE)
+            {
+                it.pos = hasPos(it, "động từ") ? Pos.VERB : hasPos(it, "danh từ") ? Pos.NOUN : Pos.VERB;
             }
             items.add(it);
         }
         return items;
     }
 
-    // ------------------------------------------------------------------ buoc 2: doan tu loai
-
-    /**
-     * Doan tu loai ma KHONG dung POS tagger.
-     *
-     * <p>Meo o day: tu dien da ghi san tu loai cho tung nhom nghia, nen khong can doan tu loai
-     * tu con so khong - chi can chon giua vai kha nang ma tu dien ĐA LIET KE. Ngu canh xung
-     * quanh (mao tu, dai tu, tro dong tu) du de chon dung trong phan lon truong hop.
-     */
-    private void assignPartOfSpeech(List<Item> items) {
-        for (int i = 0; i < items.size(); i++) {
+    // Đoán từ loại mà không cần POS tagger: từ điển đã ghi sẵn từ loại từng nhóm nghĩa, nên chỉ
+    // cần chọn giữa vài khả năng đã liệt kê, dựa vào ngữ cảnh (mạo từ, đại từ, trợ động từ).
+    private void assignPartOfSpeech(List<Item> items)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
             Item it = items.get(i);
-            if (it.pos == Pos.PUNCT) continue;
-            if (it.fw != null) {
+            if (it.pos == Pos.PUNCT)
+                continue;
+            if (it.fw != null)
+            {
                 it.pos = Pos.FUNC;
                 continue;
             }
-            if (it.pos == Pos.VERB) continue;                  // cum da chot o buoc truoc
+            if (it.pos == Pos.VERB)
+                continue; // cụm đã chốt ở bước trước
 
             Item prev = i > 0 ? items.get(i - 1) : null;
             Item next = i + 1 < items.size() ? items.get(i + 1) : null;
@@ -182,107 +172,132 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
             boolean hasAdj = hasPos(it, "tính từ");
             boolean hasAdv = hasPos(it, "phó từ") || hasPos(it, "trạng từ");
 
-            if (w.endsWith("ly") && hasAdv) {
+            if (w.endsWith("ly") && hasAdv)
+            {
                 it.pos = Pos.ADV;
-            } else if (i == 0 && (hasVerb || promoteToVerbViaLemma(it))) {
-                // Tu dau cau mà co nghia dong tu = CAU MENH LENH. Van phong de bai, huong dan
-                // ky thuat gan nhu toan la cau nay: "Map the four stages...", "Write a complete
-                // specification...". Khong co luat nay thi "Map" ra "Bản đồ".
+            }
+            else if (i == 0 && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                // Từ đầu câu có nghĩa động từ = câu mệnh lệnh (văn phong đề bài, hướng dẫn kỹ
+                // thuật): "Map the four stages...". Thiếu luật này "Map" ra "Bản đồ".
                 it.pos = Pos.VERB;
-            } else if (prev != null && (prev.pos == Pos.PUNCT
-                            || prev.isFunc(FunctionWords.Category.LIEN_TU))
-                    && verbBefore(items, i) && (hasVerb || promoteToVerbViaLemma(it))) {
-                // Liet ke dong tu: "easier to maintain, TEST, and SCALE" - ve truoc dau phay
-                // hoac truoc "and" la dong tu thi ve sau cung vay. Khong co luat nay thi
-                // "test" ra "vỏ" va "scale" ra "sự chia độ".
-                if (hasVerb) preferLemmaForVerb(it);
+            }
+            else
+                if (prev != null && (prev.pos == Pos.PUNCT || prev.isFunc(FunctionWords.Category.CONJUNCTION))
+                        && verbBefore(items, i) && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                // Liệt kê động từ: "easier to maintain, TEST, and SCALE" - vế trước dấu phẩy/"and"
+                // là động từ thì vế sau cũng vậy (không thì "test" ra "vỏ", "scale" ra "sự chia độ").
+                if (hasVerb)
+                    preferLemmaForVerb(it);
                 it.pos = Pos.VERB;
-            } else if (it.past && afterSubject(prev) && (hasVerb || promoteToVerbViaLemma(it))) {
-                // Dang qua khu dung ngay sau chu ngu thi la DONG TU CHINH cua cau, du tu dien
-                // co ghi them tu loai tinh tu. "The government DECIDED to..." - khong kiem tra
-                // cho nay thi "decided" bi coi la tinh tu bo nghia cho cum dang sau.
-                if (hasVerb) preferLemmaForVerb(it);
+            }
+                else if (it.past && afterSubject(prev) && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                // Dạng quá khứ ngay sau chủ ngữ là động từ chính dù từ điển có ghi thêm tính từ:
+                // "The government DECIDED to...".
+                if (hasVerb)
+                    preferLemmaForVerb(it);
                 it.pos = Pos.VERB;
-            } else if (endsWithS(w) && subjectNounBefore(items, i)
-                    && (hasVerb || promoteToVerbViaLemma(it))) {
-                // Chu ngu + tu ket thuc bang -s = DONG TU chia ngoi thu ba, khong phai danh tu
-                // so nhieu. "the system MONITORS analytics" tung ra "máy phát hiện phóng xạ",
-                // "a patient BOOKS a slot" tung ra "sách".
-                //
-                // Phai doi hoi danh tu dung truoc o vi tri CHU NGU (co mao tu dan dat, hoac
-                // dau cau), neu khong thi "manages user ACCOUNTS" cung bi coi la dong tu -
-                // da thu va dung la hong dung kieu do.
+            }
+                else if (endsWithS(w) && subjectNounBefore(items, i) && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                // Chủ ngữ + từ kết thúc bằng -s = động từ ngôi thứ ba, không phải danh từ số nhiều
+                // ("the system MONITORS analytics", "a patient BOOKS a slot"). Danh từ đứng
+                // trước phải ở vị trí chủ ngữ (có từ dẫn đầu hoặc đầu câu), nếu không
+                // "manages user ACCOUNTS" cũng bị coi là động từ.
                 it.pos = Pos.VERB;
-            } else if (prev != null && prev.isFunc(FunctionWords.Category.LIEN_TU)
-                    && hasAdj && adjectiveBefore(items, i)) {
-                // Lien tu noi hai thu CUNG LOAI: "known and STABLE" - ve trai la tinh tu thi
-                // ve phai cung la tinh tu. Khong co luat nay thi "stable" ra "chuồng ngựa".
+            }
+                else
+                    if (prev != null && prev.isFunc(FunctionWords.Category.CONJUNCTION) && hasAdj
+                            && adjectiveBefore(items, i))
+            {
+                // Liên từ nối hai thứ cùng loại: "known and STABLE" - vế trái là tính từ thì vế
+                // phải cũng vậy (không thì "stable" ra "chuồng ngựa").
                 it.pos = Pos.ADJ;
-            } else if (prev != null && prev.isFunc(FunctionWords.Category.TRANG_TU) && hasAdj) {
-                // "very COLD", "too SMALL": sau trang tu muc do gan nhu chac chan la tinh tu
+            }
+                    else if (prev != null && prev.isFunc(FunctionWords.Category.ADVERB) && hasAdj)
+            {
+                // "very COLD", "too SMALL": sau trạng từ mức độ gần như chắc chắn là tính từ.
                 it.pos = Pos.ADJ;
-            } else if (next != null && next.isContent() && hasAdj
-                    && !(prevIsArticle(prev) && endsWithS(next.source))) {
-                // Ngoai le: "a patient books..." - mao tu + X + tu chia -s thi X la chu ngu
-                // chu khong phai tinh tu bo nghia.
-                // Dung truoc mot tu noi dung khac -> gan nhu chac chan la bo nghia cho no.
-                // "the OLD system", "the GROWING number".
+            }
+                    else if (next != null && next.isContent() && hasAdj && !(prevIsArticle(prev) && endsWithS(next.source)))
+            {
+                // Đứng trước một từ nội dung khác thì bổ nghĩa cho nó ("the OLD system"). Ngoại lệ:
+                // mạo từ + X + từ chia -s thì X là chủ ngữ ("a patient books...").
                 it.pos = Pos.ADJ;
-            } else if (prev != null && prev.isFunc(FunctionWords.Category.PRONOUN,
-                    FunctionWords.Category.MODAL, FunctionWords.Category.FUTURE,
-                    FunctionWords.Category.NEGATION, FunctionWords.Category.DO,
-                    FunctionWords.Category.INFINITIVE, FunctionWords.Category.HAVE)
-                    && (hasVerb || promoteToVerbViaLemma(it))) {
-                // Sau dai tu / tro dong tu thi gan nhu chac chan la dong tu. Nguon hay co
-                // muc tu rieng cho dang chia ("@finished" chi ghi tinh tu), nen phai lui ve
-                // nguyen the moi lay duoc nghia dong tu.
+            }
+                    else
+                        if (prev != null
+                                && prev.isFunc(FunctionWords.Category.PRONOUN, FunctionWords.Category.MODAL,
+                                        FunctionWords.Category.FUTURE, FunctionWords.Category.NEGATION, FunctionWords.Category.DO,
+                                        FunctionWords.Category.INFINITIVE, FunctionWords.Category.HAVE)
+                                && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                // Sau đại từ/trợ động từ gần như chắc chắn là động từ. Nguồn hay có mục riêng cho
+                // dạng chia ("@finished" chỉ ghi tính từ) nên phải lùi về nguyên thể.
                 it.pos = Pos.VERB;
-            } else if (prev != null && prev.isFunc(FunctionWords.Category.BE) && it.gerund
-                    && (hasVerb || promoteToVerbViaLemma(it))) {
+            }
+                        else
+                            if (prev != null && prev.isFunc(FunctionWords.Category.BE) && it.gerund
+                                    && (hasVerb || promoteToVerbViaLemma(it)))
+            {
                 it.pos = Pos.VERB;
-            } else if (prev != null && prev.isFunc(FunctionWords.Category.ARTICLE,
-                    FunctionWords.Category.QUANTIFIER, FunctionWords.Category.POSSESSIVE,
-                    FunctionWords.Category.DEMONSTRATIVE, FunctionWords.Category.GIOI_TU)
-                    && hasNoun) {
+            }
+                            else
+                                if (prev != null && prev.isFunc(FunctionWords.Category.ARTICLE, FunctionWords.Category.QUANTIFIER,
+                                        FunctionWords.Category.POSSESSIVE, FunctionWords.Category.DEMONSTRATIVE,
+                                        FunctionWords.Category.PREPOSITION) && hasNoun)
+            {
                 it.pos = Pos.NOUN;
-            } else if (it.past && (hasVerb || promoteToVerbViaLemma(it))) {
-                if (hasVerb) preferLemmaForVerb(it);
+            }
+                                else if (it.past && (hasVerb || promoteToVerbViaLemma(it)))
+            {
+                if (hasVerb)
+                    preferLemmaForVerb(it);
                 it.pos = Pos.VERB;
-            } else if (hasNoun) {
+            }
+                                else if (hasNoun)
+            {
                 it.pos = Pos.NOUN;
-            } else if (hasVerb) {
+            }
+                                else if (hasVerb)
+            {
                 it.pos = Pos.VERB;
-            } else if (hasAdj) {
+            }
+                                else if (hasAdj)
+            {
                 it.pos = Pos.ADJ;
-            } else if (hasAdv) {
+            }
+                                else if (hasAdv)
+            {
                 it.pos = Pos.ADV;
-            } else {
+            }
+                                else
+            {
                 it.pos = Pos.UNKNOWN;
             }
         }
     }
 
-    /**
-     * "reading" trong "is reading" phai la DONG TU, nhung nguon lai co han mot muc tu
-     * {@code @reading} chi mang tu loai danh tu ("sự đọc"). Truong hop nay phai lui ve
-     * dang nguyen the {@code read} de lay nghia dong tu.
-     *
-     * @return true neu tim duoc, va {@code it.candidates} da duoc thay bang nghia cua lemma
-     */
-    /**
-     * Doi sang nghia cua dang NGUYEN THE neu nguyen the cung la dong tu. Chi ap dung cho dong
-     * tu: voi danh tu so nhieu ("systems") thi hai muc tu noi chung cung mot nghia nen khong
-     * can, con voi dong tu thi muc tu dang chia hay mang nghia khac han.
-     */
-    private void preferLemmaForVerb(Item it) {
+    // Đổi sang nghĩa của dạng nguyên thể nếu nguyên thể cũng là động từ. Chỉ áp dụng cho động
+    // từ: danh từ số nhiều ("systems") hai mục chung nghĩa, còn mục động từ chia hay mang
+    // nghĩa khác hẳn.
+    private void preferLemmaForVerb(Item it)
+    {
         String w = it.source.toLowerCase(Locale.ROOT);
-        for (String cand : Lemmatizer.candidates(w)) {
-            if (cand.equals(w)) continue;
+        for (String cand : Lemmatizer.candidates(w))
+        {
+            if (cand.equals(w))
+                continue;
             var resolved = lookup.resolve(cand);
-            if (resolved.isEmpty()) continue;
+            if (resolved.isEmpty())
+                continue;
             List<Candidate> viaLemma = lookup.candidatesOf(resolved.get().entries());
-            for (Candidate c : viaLemma) {
-                if (c.pos() != null && c.pos().contains("động từ")) {
+            for (Candidate c : viaLemma)
+            {
+                if (c.pos() != null && c.pos().contains("động từ"))
+                {
                     it.candidates = viaLemma;
                     return;
                 }
@@ -290,13 +305,20 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
         }
     }
 
-    private boolean promoteToVerbViaLemma(Item it) {
-        for (String cand : Lemmatizer.candidates(it.source.toLowerCase(Locale.ROOT))) {
+    // "reading" trong "is reading" phải là động từ nhưng nguồn có mục @reading chỉ mang danh từ
+    // ("sự đọc"): lùi về nguyên thể "read". Trả true nếu tìm được và đã thay it.candidates.
+    private boolean promoteToVerbViaLemma(Item it)
+    {
+        for (String cand : Lemmatizer.candidates(it.source.toLowerCase(Locale.ROOT)))
+        {
             var resolved = lookup.resolve(cand);
-            if (resolved.isEmpty()) continue;
+            if (resolved.isEmpty())
+                continue;
             List<Candidate> viaLemma = lookup.candidatesOf(resolved.get().entries());
-            for (Candidate c : viaLemma) {
-                if (c.pos() != null && c.pos().contains("động từ")) {
+            for (Candidate c : viaLemma)
+            {
+                if (c.pos() != null && c.pos().contains("động từ"))
+                {
                     it.candidates = viaLemma;
                     return true;
                 }
@@ -305,84 +327,99 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
         return false;
     }
 
-    /** Truoc vi tri {@code at} (bo qua dau cau) co phai mot dong tu khong. */
-    private static boolean verbBefore(List<Item> items, int at) {
-        for (int i = at - 1; i >= 0; i--) {
+    // Trước vị trí at (bỏ qua dấu câu và liên từ) có phải động từ không.
+    private static boolean verbBefore(List<Item> items, int at)
+    {
+        for (int i = at - 1; i >= 0; i--)
+        {
             Item before = items.get(i);
-            if (before.dropped || before.pos == Pos.PUNCT
-                    || before.isFunc(FunctionWords.Category.LIEN_TU)) continue;
+            if (before.dropped || before.pos == Pos.PUNCT || before.isFunc(FunctionWords.Category.CONJUNCTION))
+                continue;
             return before.pos == Pos.VERB;
         }
         return false;
     }
 
-    private static boolean prevIsArticle(Item prev) {
+    private static boolean prevIsArticle(Item prev)
+    {
         return prev != null && prev.isFunc(FunctionWords.Category.ARTICLE);
     }
 
-    /**
-     * Ngay truoc vi tri {@code at} co phai mot danh tu dang lam CHU NGU khong.
-     * Dau hieu: danh tu do duoc dan dat boi mao tu / so huu / chi dinh, hoac dung dau cau.
-     */
-    private static boolean subjectNounBefore(List<Item> items, int at) {
+    // Ngay trước at có phải danh từ đang làm chủ ngữ không: được dẫn đầu bởi mạo từ/sở hữu/
+    // chỉ định, hoặc đứng đầu câu.
+    private static boolean subjectNounBefore(List<Item> items, int at)
+    {
         Item prev = null;
         int prevIndex = -1;
-        for (int i = at - 1; i >= 0; i--) {
-            if (items.get(i).dropped) continue;
+        for (int i = at - 1; i >= 0; i--)
+        {
+            if (items.get(i).dropped)
+                continue;
             prev = items.get(i);
             prevIndex = i;
             break;
         }
-        if (prev == null || prev.pos != Pos.NOUN) return false;
-        for (int i = prevIndex - 1; i >= 0; i--) {
+        if (prev == null || prev.pos != Pos.NOUN)
+            return false;
+        for (int i = prevIndex - 1; i >= 0; i--)
+        {
             Item before = items.get(i);
-            // Tinh tu / trang tu bo nghia khong phai tu dan dat: trong "into smaller MODULES
-            // makes it easier" thi tu dan dat cua "modules" la "into", khong phai "smaller".
-            if (before.dropped || before.pos == Pos.ADJ || before.pos == Pos.ADV) continue;
-            return before.isFunc(FunctionWords.Category.ARTICLE,
-                    FunctionWords.Category.POSSESSIVE, FunctionWords.Category.DEMONSTRATIVE,
-                    FunctionWords.Category.QUANTIFIER, FunctionWords.Category.GIOI_TU);
+            // Tính từ/trạng từ bổ nghĩa không phải từ dẫn đầu: ở "into smaller MODULES makes it
+            // easier" từ dẫn đầu của "modules" là "into".
+            if (before.dropped || before.pos == Pos.ADJ || before.pos == Pos.ADV)
+                continue;
+            return before.isFunc(FunctionWords.Category.ARTICLE, FunctionWords.Category.POSSESSIVE,
+                    FunctionWords.Category.DEMONSTRATIVE, FunctionWords.Category.QUANTIFIER,
+                    FunctionWords.Category.PREPOSITION);
         }
-        return true;                                   // danh tu mo dau cau
+        return true; // danh từ mở đầu câu
     }
 
-    /** Ket thuc bang -s nhung khong phai -ss (class, address... khong phai dang chia). */
-    private static boolean endsWithS(String word) {
+    // Kết thúc bằng -s nhưng không phải -ss (class, address không phải dạng chia).
+    private static boolean endsWithS(String word)
+    {
         return word.length() > 3 && word.endsWith("s") && !word.endsWith("ss");
     }
 
-    /**
-     * Truoc lien tu o vi tri {@code at} co phai mot tinh tu khong (bo qua chinh lien tu do).
-     * Dung cho luat "A and B thi B cung loai voi A".
-     */
-    private static boolean adjectiveBefore(List<Item> items, int at) {
-        for (int i = at - 2; i >= 0; i--) {
+    // Trước liên từ ở at có phải tính từ không (cho luật "A and B thì B cùng loại với A").
+    private static boolean adjectiveBefore(List<Item> items, int at)
+    {
+        for (int i = at - 2; i >= 0; i--)
+        {
             Item before = items.get(i);
-            if (before.dropped) continue;
+            if (before.dropped)
+                continue;
             return before.pos == Pos.ADJ;
         }
         return false;
     }
 
-    /** Dung ngay sau chu ngu (danh tu, dai tu) hoac dau cau. */
-    private static boolean afterSubject(Item prev) {
-        if (prev == null) return true;
+    // Đứng ngay sau chủ ngữ (danh từ, đại từ) hoặc đầu câu.
+    private static boolean afterSubject(Item prev)
+    {
+        if (prev == null)
+            return true;
         return prev.pos == Pos.NOUN || prev.isFunc(FunctionWords.Category.PRONOUN);
     }
 
-    private static boolean hasPos(Item it, String posName) {
-        for (Candidate c : it.candidates) {
-            if (c.pos() != null && c.pos().contains(posName)) return true;
+    private static boolean hasPos(Item it, String posName)
+    {
+        for (Candidate c : it.candidates)
+        {
+            if (c.pos() != null && c.pos().contains(posName))
+                return true;
         }
         return false;
     }
 
-    // ------------------------------------------------------------------ buoc 3: chon nghia
-
-    private void chooseVietnamese(List<Item> items) {
-        for (Item it : items) {
-            if (it.pos == Pos.PUNCT) continue;
-            if (it.fw != null) {
+    private void chooseVietnamese(List<Item> items)
+    {
+        for (Item it : items)
+        {
+            if (it.pos == Pos.PUNCT)
+                continue;
+            if (it.fw != null)
+            {
                 it.vi = it.fw.vi();
                 continue;
             }
@@ -390,29 +427,18 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
         }
     }
 
-    /**
-     * Chon chu tieng Viet cho mot tu, theo hai tang.
-     *
-     * <p><b>Tang 1 - ngu phap.</b> Loc lay cac nhom nghia dung TU LOAI da doan. Viec nay luat
-     * lam duoc chac chan nen no di truoc.
-     *
-     * <p><b>Tang 2 - thong ke.</b> Trong so nhung phuong an con lai, chon cai ma NGUOI TA
-     * THAT SU HAY DICH NHU VAY, dua vao {@link LexicalPrior}. Day la thu luat khong bao gio
-     * quyet dinh duoc: {@code government} co sau nghia danh tu ("sự cai trị", "chính phủ",
-     * "chính quyền", "chính thể"...) deu dung ngu phap ca, va tu dien xep "sự cai trị" len dau.
-     * Bang xac suat hoc tu 1,2 trieu cap cau biet {@code government} -> chính(0,41) phủ(0,39),
-     * nen "chính phủ" thang.
-     *
-     * <p>Cham diem tung PHUONG AN mot chu khong chi tung dong nghia: mot dong nghia cua tu
-     * dien thuong la mot chum ("cho, biếu, tặng, ban") va phuong an dau chua chac la phuong
-     * an dung.
-     *
-     * <p>Khong co bang xac suat thi tang 2 bi bo qua va ket qua quay ve nhu cu.
-     */
-    private String pickBest(Item it) {
-        if (it.candidates.isEmpty()) return it.source;
+    // Chọn chữ tiếng Việt cho một từ, hai tầng. Tầng 1 (ngữ pháp): lọc nhóm nghĩa đúng từ loại
+    // đã đoán. Tầng 2 (thống kê): trong số còn lại chọn phương án người ta hay dịch nhất theo
+    // LexicalPrior (government có sáu nghĩa danh từ đúng ngữ pháp; bảng học từ 1,2 triệu cặp
+    // câu cho "chính phủ" thắng "sự cai trị"). Chấm từng PHƯƠNG ÁN chứ không từng dòng nghĩa
+    // vì một dòng thường là cả chùm ("cho, biếu, tặng"). Không có prior thì bỏ qua tầng 2.
+    private String pickBest(Item it)
+    {
+        if (it.candidates.isEmpty())
+            return it.source;
 
-        String wanted = switch (it.pos) {
+        String wanted = switch (it.pos)
+        {
             case NOUN -> "danh từ";
             case VERB -> "động từ";
             case ADJ -> "tính từ";
@@ -420,107 +446,121 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
             default -> null;
         };
         List<Candidate> pool = new ArrayList<>(it.candidates.size());
-        if (wanted != null) {
-            for (Candidate c : it.candidates) {
-                if (c.pos() != null && c.pos().contains(wanted) && !isJunk(c.gloss())) pool.add(c);
+        if (wanted != null)
+        {
+            for (Candidate c : it.candidates)
+            {
+                if (c.pos() != null && c.pos().contains(wanted) && !isJunk(c.gloss()))
+                    pool.add(c);
             }
         }
-        if (pool.isEmpty()) {
-            for (Candidate c : it.candidates) if (!isJunk(c.gloss())) pool.add(c);
+        if (pool.isEmpty())
+        {
+            for (Candidate c : it.candidates)
+                if (!isJunk(c.gloss()))
+                    pool.add(c);
         }
-        if (pool.isEmpty()) return shorten(it.candidates.getFirst().gloss());
+        if (pool.isEmpty())
+            return shorten(it.candidates.getFirst().gloss());
 
-        // Nguon do nguoi dung xep tren THANG TUYET DOI. Mot bang thuat ngu tu soan la mot
-        // quyet dinh co y cua nguoi dung; bang xac suat hoc tu phu de phim khong duoc phep
-        // de len tren no. Do that: "platform" trong bang thuat ngu la "nền tảng", nhung
-        // thong ke tu kho phu de lai thay "sân ga" hay hon - va nguoi dung thi dang doc
-        // tai lieu ky thuat.
+        // Nguồn do người dùng xếp trên thắng tuyệt đối: bảng thuật ngữ tự soạn là quyết định có
+        // ý, thống kê từ phụ đề không được đè lên (đo được: "platform" -> "nền tảng" vs "sân ga").
         int bestPriority = Integer.MAX_VALUE;
-        for (Candidate c : pool) bestPriority = Math.min(bestPriority, lookup.priorityOf(c));
-        if (bestPriority != Integer.MAX_VALUE) {
+        for (Candidate c : pool)
+            bestPriority = Math.min(bestPriority, lookup.priorityOf(c));
+        if (bestPriority != Integer.MAX_VALUE)
+        {
             List<Candidate> top = new ArrayList<>(pool.size());
-            for (Candidate c : pool) if (lookup.priorityOf(c) == bestPriority) top.add(c);
-            if (!top.isEmpty()) pool = top;
+            for (Candidate c : pool)
+                if (lookup.priorityOf(c) == bestPriority)
+                    top.add(c);
+            if (!top.isEmpty())
+                pool = top;
         }
 
         String fallback = shorten(pool.getFirst().gloss());
-        if (!prior.isAvailable()) return fallback;
+        if (!prior.isAvailable())
+            return fallback;
 
         String en = it.source.toLowerCase(Locale.ROOT);
         String best = null;
         double bestScore = 0;
-        for (Candidate c : pool) {
-            for (String alt : alternatives(c.gloss())) {
+        for (Candidate c : pool)
+        {
+            for (String alt : alternatives(c.gloss()))
+            {
                 double score = prior.scoreGloss(en, TextNormalizer.splitTokens(alt));
-                if (score == 0 && c.headword() != null) {
-                    // Tu trong cau la dang chia ("systems"), bang chi biet dang goc ("system")
+                if (score == 0 && c.headword() != null)
+                {
+                    // Từ trong câu là dạng chia ("systems"), bảng chỉ biết dạng gốc ("system").
                     score = prior.scoreGloss(c.headword(), TextNormalizer.splitTokens(alt));
                 }
-                if (score > bestScore) { bestScore = score; best = alt; }
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = alt;
+                }
             }
         }
         return best != null ? best : fallback;
     }
 
-    /** Xem {@link TextNormalizer#glossAlternatives} - de o day cho goi cho gon. */
-    static List<String> alternatives(String gloss) {
+    // Xem TextNormalizer#glossAlternatives.
+    static List<String> alternatives(String gloss)
+    {
         return TextNormalizer.glossAlternatives(gloss);
     }
 
-    /**
-     * Nghia hong cua nguon: con sot markup ("&lt;vt&gt; vg rất tốt") hoac chi la chu thich
-     * cach dung, khong phai nghia. Nhet vao cau dich thi thanh rac.
-     */
-    private static boolean isJunk(String gloss) {
+    // Nghĩa hỏng của nguồn (sót markup, chỉ là chú thích cách dùng): nhét vào câu dịch thành rác.
+    private static boolean isJunk(String gloss)
+    {
         return LookupService.isJunkGloss(gloss) || shorten(gloss).isBlank();
     }
 
-    /**
-     * Mot dong nghia trong tu dien la ca mot chum dong nghia kem chu thich:
-     * "giữ vững, giữ không cho đổ, giữ không cho hạ (máy...)". Trong cau dich chi lay
-     * phuong an dau - nguoi doc can MOT tu o dung cho do.
-     *
-     * <p>Chi dung lam duong lui khi khong co bang xac suat; co bang thi
-     * {@link #pickBest} cham diem tung phuong an va chon cai dung hon.
-     */
-    static String shorten(String gloss) {
-        if (gloss == null) return "";
+    // Một dòng nghĩa là cả chùm đồng nghĩa kèm chú thích: trong câu dịch chỉ lấy phương án đầu
+    // (cần MỘT từ ở đúng chỗ). Chỉ là đường lùi khi không có prior; có thì pickBest chấm từng
+    // phương án.
+    static String shorten(String gloss)
+    {
+        if (gloss == null)
+            return "";
         List<String> alts = alternatives(gloss);
-        if (!alts.isEmpty()) return alts.getFirst();
+        if (!alts.isEmpty())
+            return alts.getFirst();
         return gloss.replaceAll("\\s+", " ").trim();
     }
 
-    // ------------------------------------------------------------------ buoc 4: luat ngu phap
-
-    /**
-     * Cap so sanh: tieng Anh bien hinh ("small" -&gt; "smaller"), tieng Viet them tu
-     * ("nhỏ" -&gt; "nhỏ hơn"). {@link Lemmatizer} da cat duoi -er/-est de tra duoc tu dien,
-     * nhung nghia tra ra la nghia cua dang GOC nen mat han y so sanh: "makes it easier to
-     * maintain" tung ra "dễ" thay vi "dễ hơn", "into smaller modules" ra "nhỏ" thay vi
-     * "nhỏ hơn".
-     *
-     * <p>Chi danh dau khi tu o dang so sanh KHONG phai mot muc tu that. "user", "proper",
-     * "other" cung ket thuc bang -er nhung co muc tu rieng, cham vao la sai.
-     */
-    private void markComparatives(List<Item> items) {
-        for (Item it : items) {
-            if (it.dropped || it.vi == null || it.vi.isBlank()) continue;
-            if (it.pos != Pos.ADJ && it.pos != Pos.ADV) continue;
+    // Cấp so sánh: tiếng Việt thêm từ ("nhỏ" -> "nhỏ hơn"). Lemmatizer cắt đuôi -er/-est để tra
+    // được từ điển nhưng nghĩa ra là của dạng GỐC nên mất ý so sánh ("easier" ra "dễ" thay vì
+    // "dễ hơn"). Chỉ đánh dấu khi từ không có mục riêng: "user", "proper", "other" cũng đuôi -er.
+    private void markComparatives(List<Item> items)
+    {
+        for (Item it : items)
+        {
+            if (it.dropped || it.vi == null || it.vi.isBlank())
+                continue;
+            if (it.pos != Pos.ADJ && it.pos != Pos.ADV)
+                continue;
             String w = it.source.toLowerCase(Locale.ROOT);
             String suffix;
-            if (w.endsWith("est") && w.length() > 5) suffix = " nhất";
-            else if (w.endsWith("er") && w.length() > 4) suffix = " hơn";
-            else continue;
-            // Phai la tu KHONG co muc tu rieng, tuc la vua tra duoc nho lemma hoa. Dung
-            // resolve().isPresent() thi bao gio cung true vi resolve() tu lemma hoa lay -
-            // da mac dung loi nay, "older" khong bao gio duoc them "hơn".
+            if (w.endsWith("est") && w.length() > 5)
+                suffix = " nhất";
+            else
+                if (w.endsWith("er") && w.length() > 4)
+                    suffix = " hơn";
+                else
+                    continue;
+            // Phải là từ không có mục riêng, tức là tra được nhờ lemma hoá. Không dùng
+            // resolve().isPresent() vì resolve() tự lemma hoá nên luôn true.
             var resolved = lookup.resolve(w);
-            if (resolved.isEmpty() || !resolved.get().viaLemma()) continue;
+            if (resolved.isEmpty() || !resolved.get().viaLemma())
+                continue;
             it.vi = it.vi + suffix;
         }
     }
 
-    private static void applyGrammarRules(List<Item> items) {
+    private static void applyGrammarRules(List<Item> items)
+    {
         mergeAdverbIntoAdjective(items);
         mergeNegation(items);
         fixNegatedDegree(items);
@@ -529,144 +569,188 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
         reorderNounPhrases(items);
     }
 
-    /**
-     * Gop trang tu muc do vao tinh tu dung sau no thanh MOT don vi.
-     *
-     * <p>Neu khong gop, buoc sap lai danh ngu se day tinh tu ra sau danh tu con trang tu thi
-     * o lai: "a very good book" -&gt; "rất sách tốt". Gop roi thi ra "sách rất tốt".
-     * Tieng Viet giu nguyen thu tu trang tu + tinh tu nen chi viec noi chuoi.
-     */
-    private static void mergeAdverbIntoAdjective(List<Item> items) {
-        for (int i = 0; i < items.size(); i++) {
+    // Gộp trạng từ mức độ vào tính từ đứng sau thành MỘT đơn vị: không gộp thì sắp lại danh
+    // ngữ đẩy tính từ ra sau danh từ còn trạng từ ở lại ("a very good book" -> "rất sách tốt").
+    private static void mergeAdverbIntoAdjective(List<Item> items)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
             Item adv = items.get(i);
-            if (adv.dropped || !adv.isFunc(FunctionWords.Category.TRANG_TU)) continue;
+            if (adv.dropped || !adv.isFunc(FunctionWords.Category.ADVERB))
+                continue;
             Item next = nextLive(items, i);
-            if (next == null || next.pos != Pos.ADJ) continue;
+            if (next == null || next.pos != Pos.ADJ)
+                continue;
             next.vi = adv.vi + " " + next.vi;
             adv.dropped = true;
         }
     }
 
-    /** "could not" -&gt; "không thể", "did not" -&gt; "không", "has not" -&gt; "chưa". */
-    private static void mergeNegation(List<Item> items) {
-        for (int i = 1; i < items.size(); i++) {
+    // "could not" -> "không thể", "did not" -> "không", "has not" -> "chưa".
+    private static void mergeNegation(List<Item> items)
+    {
+        for (int i = 1; i < items.size(); i++)
+        {
             Item neg = items.get(i);
-            if (!neg.isFunc(FunctionWords.Category.NEGATION)) continue;
+            if (!neg.isFunc(FunctionWords.Category.NEGATION))
+                continue;
             Item prev = previousLive(items, i);
-            if (prev == null || prev.fw == null) continue;
-            switch (prev.fw.cat()) {
+            if (prev == null || prev.fw == null)
+                continue;
+            switch (prev.fw.cat())
+            {
                 case MODAL -> {
-                    // "có thể" + "không" khong ghep may moc thanh "không có thể"
+                    // Không ghép máy móc thành "không có thể".
                     prev.vi = prev.vi.equals("có thể") ? "không thể" : "không " + prev.vi;
                     neg.dropped = true;
                 }
-                case FUTURE -> { prev.vi = prev.vi + " không"; neg.dropped = true; }
-                case BE, DO -> { prev.vi = "không"; prev.negated = true; neg.dropped = true; }
-                case HAVE -> { prev.vi = "chưa"; prev.negated = true; neg.dropped = true; }
-                default -> { }
+                case FUTURE -> {
+                    prev.vi = prev.vi + " không";
+                    neg.dropped = true;
+                }
+                case BE, DO -> {
+                    prev.vi = "không";
+                    prev.negated = true;
+                    neg.dropped = true;
+                }
+                case HAVE -> {
+                    prev.vi = "chưa";
+                    prev.negated = true;
+                    neg.dropped = true;
+                }
+                default -> {
+                }
             }
         }
     }
 
-    /**
-     * "not very difficult" -&gt; "không khó lắm", khong phai "không rất khó".
-     * Tieng Viet day muc do ra SAU khi co phu dinh.
-     */
-    private static void fixNegatedDegree(List<Item> items) {
-        for (int i = 0; i < items.size(); i++) {
+    // "not very difficult" -> "không khó lắm": tiếng Việt đẩy mức độ ra sau khi có phủ định.
+    private static void fixNegatedDegree(List<Item> items)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
             Item it = items.get(i);
-            if (it.dropped || !(it.negated || it.isFunc(FunctionWords.Category.NEGATION))) continue;
+            if (it.dropped || !(it.negated || it.isFunc(FunctionWords.Category.NEGATION)))
+                continue;
             Item next = nextLive(items, i);
-            if (next == null || next.vi == null || !next.vi.startsWith("rất ")) continue;
+            if (next == null || next.vi == null || !next.vi.startsWith("rất "))
+                continue;
             next.vi = next.vi.substring(4) + " lắm";
         }
     }
 
-    /**
-     * to be dung truoc tinh tu thi tieng Viet KHONG can he tu: "the system is old" ->
-     * "hệ thống cũ", khong phai "hệ thống là cũ". Truoc dong tu -ing thi thanh "đang".
-     */
-    private static void handleAuxiliaries(List<Item> items) {
-        for (int i = 0; i < items.size(); i++) {
+    // to be trước tính từ thì tiếng Việt không cần hệ từ ("the system is old" -> "hệ thống cũ");
+    // trước động từ -ing thì thành "đang".
+    private static void handleAuxiliaries(List<Item> items)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
             Item it = items.get(i);
-            if (it.dropped) continue;
+            if (it.dropped)
+                continue;
             Item next = nextLive(items, i);
-            if (next == null) continue;
+            if (next == null)
+                continue;
 
-            if (it.negated) continue;                       // "does not" -> "không", giu lai
+            if (it.negated)
+                continue; // "does not" -> "không", giữ lại
 
-            if (it.isFunc(FunctionWords.Category.BE)) {
-                if (next.pos == Pos.VERB && next.gerund) it.vi = "đang";
-                else if (next.pos == Pos.ADJ) it.dropped = true;
-            } else if (it.isFunc(FunctionWords.Category.DO) && next.pos == Pos.VERB) {
-                it.dropped = true;                              // tro dong tu rong
-            } else if (it.isFunc(FunctionWords.Category.GIOI_TU)
-                    && it.source.equalsIgnoreCase("to") && next.pos == Pos.VERB) {
-                it.dropped = true;                              // to-infinitive, khong phai "đến"
+            if (it.isFunc(FunctionWords.Category.BE))
+            {
+                if (next.pos == Pos.VERB && next.gerund)
+                    it.vi = "đang";
+                else
+                    if (next.pos == Pos.ADJ)
+                        it.dropped = true;
+            }
+            else if (it.isFunc(FunctionWords.Category.DO) && next.pos == Pos.VERB)
+            {
+                it.dropped = true; // trợ động từ rỗng
+            }
+            else
+                if (it.isFunc(FunctionWords.Category.PREPOSITION) && it.source.equalsIgnoreCase("to")
+                        && next.pos == Pos.VERB)
+            {
+                it.dropped = true; // to-infinitive, không phải "đến"
             }
         }
     }
 
-    /** Chen "đã" truoc dong tu qua khu, tru khi da co dau hieu thi o ngay truoc. */
-    private static void markTense(List<Item> items) {
-        for (int i = 0; i < items.size(); i++) {
+    // Chèn "đã" trước động từ quá khứ, trừ khi ngay trước đã có dấu hiệu thì.
+    private static void markTense(List<Item> items)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
             Item it = items.get(i);
-            if (it.dropped || it.pos != Pos.VERB || !it.past) continue;
+            if (it.dropped || it.pos != Pos.VERB || !it.past)
+                continue;
             Item prev = previousLive(items, i);
-            if (prev != null && (prev.isFunc(FunctionWords.Category.HAVE,
-                    FunctionWords.Category.FUTURE, FunctionWords.Category.MODAL,
-                    FunctionWords.Category.BE, FunctionWords.Category.NEGATION))) {
-                continue;                                       // "had gone", "will go", "không thể"
+            if (prev != null && (prev.isFunc(FunctionWords.Category.HAVE, FunctionWords.Category.FUTURE,
+                    FunctionWords.Category.MODAL, FunctionWords.Category.BE, FunctionWords.Category.NEGATION)))
+            {
+                continue; // "had gone", "will go", "không thể"
             }
             it.vi = "đã " + it.vi;
         }
     }
 
-    /**
-     * Sap lai danh ngu cho dung trat tu tieng Viet.
-     *
-     * <pre>
-     *   Anh:  [mạo từ] [lượng từ] [tính từ] DANH TỪ        the old system
-     *   Việt: [lượng từ] DANH TỪ [tính từ] [chỉ định] [sở hữu]   hệ thống cũ này của tôi
-     * </pre>
-     *
-     * Quet mot cum lien tuc gom mao tu / luong tu / so huu / chi dinh / tinh tu va ket thuc
-     * bang danh tu, roi phat lai theo thu tu tieng Viet. Gioi tu, dong tu, dau cau deu cat
-     * cum - nho vay "number of users" khong bi tron lam mot.
-     */
-    private static void reorderNounPhrases(List<Item> items) {
+    // Sắp lại danh ngữ theo trật tự tiếng Việt:
+    // Anh: [mạo từ] [lượng từ] [tính từ] DANH TỪ the old system
+    // Việt: [lượng từ] DANH TỪ [tính từ] [chỉ định] [sở hữu] hệ thống cũ này của tôi
+    // Quét một cụm liên tục gồm mạo từ/lượng từ/sở hữu/chỉ định/tính từ kết thúc bằng danh từ
+    // rồi phát lại; giới từ, động từ, dấu câu cắt cụm ("number of users" không trộn làm một).
+    private static void reorderNounPhrases(List<Item> items)
+    {
         int i = 0;
-        while (i < items.size()) {
+        while (i < items.size())
+        {
             int start = i;
             int lastNoun = -1;
             int j = i;
-            while (j < items.size() && inNounPhrase(items.get(j))) {
-                // Gap mao tu / luong tu / so huu SAU khi da co danh tu nghia la mot danh ngu
-                // MOI bat dau: "Vietnamese every day" la hai cum, khong phai mot.
-                if (lastNoun >= 0 && isDeterminer(items.get(j))) break;
-                if (items.get(j).pos == Pos.NOUN) lastNoun = j;
+            while (j < items.size() && inNounPhrase(items.get(j)))
+            {
+                // Từ hạn định sau khi đã có danh từ là danh ngữ MỚI: "Vietnamese every day".
+                if (lastNoun >= 0 && isDeterminer(items.get(j)))
+                    break;
+                if (items.get(j).pos == Pos.NOUN)
+                    lastNoun = j;
                 j++;
             }
-            if (lastNoun < 0 || lastNoun == start) {
+            if (lastNoun < 0 || lastNoun == start)
+            {
                 i = Math.max(j, i + 1);
                 continue;
             }
             List<Item> span = new ArrayList<>(items.subList(start, lastNoun + 1));
-            // articles van phai nam trong danh sach phat lai du da bi bo: so o phai khop
-            // dung voi so o cu, neu khong thi o cuoi con giu item cu va tu bi LAP LAI.
+            // articles (đã bị bỏ) vẫn phải nằm trong danh sách phát lại: số ô phải khớp ô cũ,
+            // nếu không ô cuối còn giữ item cũ và từ bị lặp.
             List<Item> articles = new ArrayList<>();
             List<Item> quantifiers = new ArrayList<>();
             List<Item> nouns = new ArrayList<>();
             List<Item> adjectives = new ArrayList<>();
             List<Item> demonstratives = new ArrayList<>();
             List<Item> possessives = new ArrayList<>();
-            for (Item it : span) {
-                if (it.isFunc(FunctionWords.Category.ARTICLE)) { it.dropped = true; articles.add(it); }
-                else if (it.isFunc(FunctionWords.Category.QUANTIFIER)) quantifiers.add(it);
-                else if (it.isFunc(FunctionWords.Category.DEMONSTRATIVE)) demonstratives.add(it);
-                else if (it.isFunc(FunctionWords.Category.POSSESSIVE)) possessives.add(it);
-                else if (it.pos == Pos.ADJ) adjectives.add(it);
-                else nouns.add(it);
+            for (Item it : span)
+            {
+                if (it.isFunc(FunctionWords.Category.ARTICLE))
+                {
+                    it.dropped = true;
+                    articles.add(it);
+                }
+                else
+                    if (it.isFunc(FunctionWords.Category.QUANTIFIER))
+                        quantifiers.add(it);
+                    else
+                        if (it.isFunc(FunctionWords.Category.DEMONSTRATIVE))
+                            demonstratives.add(it);
+                        else
+                            if (it.isFunc(FunctionWords.Category.POSSESSIVE))
+                                possessives.add(it);
+                            else
+                                if (it.pos == Pos.ADJ)
+                                    adjectives.add(it);
+                                else
+                                    nouns.add(it);
             }
             List<Item> rebuilt = new ArrayList<>(span.size());
             rebuilt.addAll(articles);
@@ -675,59 +759,78 @@ public final class RuleBasedTranslationEngine implements TranslationEngine {
             rebuilt.addAll(adjectives);
             rebuilt.addAll(demonstratives);
             rebuilt.addAll(possessives);
-            if (rebuilt.size() != span.size()) {
-                throw new IllegalStateException("sap lai danh ngu lam mat item: "
-                        + span.size() + " -> " + rebuilt.size());
+            if (rebuilt.size() != span.size())
+            {
+                throw new IllegalStateException(
+                        "noun phrase reordering lost items: " + span.size() + " -> " + rebuilt.size());
             }
-            for (int k = 0; k < rebuilt.size(); k++) items.set(start + k, rebuilt.get(k));
+            for (int k = 0; k < rebuilt.size(); k++)
+                items.set(start + k, rebuilt.get(k));
 
             i = lastNoun + 1;
         }
     }
 
-    private static boolean isDeterminer(Item it) {
+    private static boolean isDeterminer(Item it)
+    {
         return it.isFunc(FunctionWords.Category.ARTICLE, FunctionWords.Category.QUANTIFIER,
                 FunctionWords.Category.POSSESSIVE, FunctionWords.Category.DEMONSTRATIVE);
     }
 
-    private static boolean inNounPhrase(Item it) {
-        if (it.dropped) return false;
-        if (it.pos == Pos.NOUN || it.pos == Pos.ADJ) return true;
+    private static boolean inNounPhrase(Item it)
+    {
+        if (it.dropped)
+            return false;
+        if (it.pos == Pos.NOUN || it.pos == Pos.ADJ)
+            return true;
         return it.isFunc(FunctionWords.Category.ARTICLE, FunctionWords.Category.QUANTIFIER,
                 FunctionWords.Category.POSSESSIVE, FunctionWords.Category.DEMONSTRATIVE);
     }
 
-    private static Item previousLive(List<Item> items, int from) {
-        for (int i = from - 1; i >= 0; i--) {
-            if (!items.get(i).dropped) return items.get(i);
+    private static Item previousLive(List<Item> items, int from)
+    {
+        for (int i = from - 1; i >= 0; i--)
+        {
+            if (!items.get(i).dropped)
+                return items.get(i);
         }
         return null;
     }
 
-    private static Item nextLive(List<Item> items, int from) {
-        for (int i = from + 1; i < items.size(); i++) {
-            if (!items.get(i).dropped) return items.get(i);
+    private static Item nextLive(List<Item> items, int from)
+    {
+        for (int i = from + 1; i < items.size(); i++)
+        {
+            if (!items.get(i).dropped)
+                return items.get(i);
         }
         return null;
     }
 
-    // ------------------------------------------------------------------ buoc 5: noi cau
-
-    private static String join(List<Item> items) {
+    private static String join(List<Item> items)
+    {
         StringBuilder sb = new StringBuilder(96);
-        for (Item it : items) {
-            if (it.dropped) continue;
+        for (Item it : items)
+        {
+            if (it.dropped)
+                continue;
             String piece = it.vi == null ? "" : it.vi.trim();
-            if (piece.isEmpty()) continue;
-            if (it.pos == Pos.PUNCT) {
-                sb.append(piece);                                // dau cau dinh sat tu truoc
-            } else {
-                if (!sb.isEmpty()) sb.append(' ');
+            if (piece.isEmpty())
+                continue;
+            if (it.pos == Pos.PUNCT)
+            {
+                sb.append(piece); // dấu câu dính sát từ trước
+            }
+            else
+            {
+                if (!sb.isEmpty())
+                    sb.append(' ');
                 sb.append(piece);
             }
         }
         String out = sb.toString().replaceAll("\\s+", " ").trim();
-        if (out.isEmpty()) return out;
+        if (out.isEmpty())
+            return out;
         return Character.toUpperCase(out.charAt(0)) + out.substring(1);
     }
 }

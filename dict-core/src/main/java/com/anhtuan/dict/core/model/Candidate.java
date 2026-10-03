@@ -1,17 +1,15 @@
 package com.anhtuan.dict.core.model;
 
-/**
- * Mot lua chon nghia cho mot Segment.
- * UI hien candidate dau tien, nguoi dung bam vao de doi sang cac candidate khac.
- *
- * @param score diem xep hang; gloss engine dung thu tu sense, BM25 dung diem thuc
- */
-public record Candidate(String headword, String gloss, String pos, double score, int sourceId) {
+// Một lựa chọn nghĩa cho một Segment; UI hiện candidate đầu tiên, người dùng bấm để đổi sang candidate khác.
+// score là điểm xếp hạng: gloss engine dùng thứ tự sense, BM25 dùng điểm thực.
+public record Candidate(String headword, String gloss, String pos, double score, int sourceId)
+{
 
-    /** Nguon khong xac dinh - dung cho cac candidate tu sinh (tu chuc nang, cau da dich). */
+    // Nguồn không xác định, dùng cho candidate tự sinh (từ chức năng, câu đã dịch).
     public static final int NO_SOURCE = -1;
 
-    public Candidate(String headword, String gloss, String pos, double score) {
+    public Candidate(String headword, String gloss, String pos, double score)
+    {
         this(headword, gloss, pos, score, NO_SOURCE);
     }
 }

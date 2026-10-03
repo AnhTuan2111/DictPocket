@@ -27,31 +27,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-/**
- * Dung inverted index Viet-&gt;Anh va index fuzzy (PLAN.md 7.1).
- *
- * <p>Sinh BA file:
- * <ul>
- *   <li>{@code vi.idx}        - term tieng Viet CO dau</li>
- *   <li>{@code vi-nodiac.idx} - term da BO dau; thieu file nay thi nguoi go nhanh
- *       ("cham soc") khong tim ra gi va app "cam giac ngu" ngay</li>
- *   <li>{@code tri.idx}       - trigram cua headword, de doan tu go sai</li>
- * </ul>
- *
- * <p>QUAN TRONG: docId = chi so cua entry trong dict.pack. Vi vay danh sach entry truyen
- * vao day phai duoc sap xep GIONG HET PackWriter. Ham nay tu sap xep lai bang cung
- * comparator nen goi voi danh sach chua sap xep cung dung.
- */
-public final class IndexWriter {
-    private IndexWriter() {}
+// Dựng inverted index Việt->Anh và index fuzzy thành ba file: vi.idx (có dấu), vi-nodiac.idx (bỏ dấu,
+// để gõ nhanh "cham soc" vẫn ra kết quả) và tri.idx (trigram của headword, đoán từ gõ sai).
+// docId là chỉ số entry trong dict.pack nên danh sách entry phải sắp giống hệt PackWriter;
+// hàm này tự sắp lại bằng cùng comparator.
+public final class IndexWriter
+{
+    private IndexWriter()
+    {
+    }
 
-    /** Mang int tang dan, tranh phi cua Integer boxing khi co ~700.000 cap postings. */
-    private static final class IntList {
+    // Mảng int tăng dần, tránh boxing Integer khi có ~700.000 cặp postings.
+    private static final class IntList
+    {
         private int[] a = new int[4];
         private int n;
 
-        void add(int v) {
-            if (n == a.length) {
+        void add(int v)
+        {
+            if (n == a.length)
+            {
                 int[] b = new int[a.length * 2];
                 System.arraycopy(a, 0, b, 0, n);
                 a = b;
@@ -59,36 +54,38 @@ public final class IndexWriter {
             a[n++] = v;
         }
 
-        int size() { return n; }
-        int get(int i) { return a[i]; }
+        int size()
+        {
+            return n;
+        }
+
+        int get(int i)
+        {
+            return a[i];
+        }
     }
 
-    public record Stats(String fileName, int termCount, int docCount, long postingPairs, long fileSize) {}
+    public record Stats(String fileName, int termCount, int docCount, long postingPairs, long fileSize)
+    {
+    }
 
-    /**
-     * Dung ca ba index vao {@code targetDir}.
-     *
-     * @return so lieu tung file, de CLI in ra doi chieu tieu chi nghiem thu M3
-     */
-    /** So lan mot phuong an phai lap lai thi moi duoc coi la tu ghep that. */
+    // Số lần một phương án phải lặp lại mới được coi là từ ghép thật.
     public static final int MIN_COMPOUND_COUNT = 3;
 
-    public static List<Stats> build(Path targetDir, List<Entry> entries) {
+    // Dựng cả ba index vào targetDir, trả về số liệu từng file để CLI in ra.
+    public static List<Stats> build(Path targetDir, List<Entry> entries)
+    {
         List<Entry> sorted = new ArrayList<>(entries);
         sorted.sort(Comparator.comparing(Entry::headwordNorm, Utf8Compare.COMPARATOR));
 
-        // Rut danh sach tu ghep tieng Viet TU CHINH TU DIEN. Danh sach nay KHONG di vao
-        // index: da do thu ca hai cach, nhet tu ghep thanh term rieng lam hai file index
-        // phong tu 4,3 MB len 6,3 MB ma thu tu ket qua gan nhu khong khac. Ly do: he so do
-        // phu truy van (binh phuong) von da lam gan het viec ma tu ghep dinh lam. Danh sach
-        // chi duoc dung o buoc XEP LAI, noi no thuc su tao ra khac biet - xem
-        // ReverseSearchService.
+        // Rút danh sách từ ghép tiếng Việt từ chính từ điển. Danh sách này không đưa vào index: đã đo, nhét từ ghép
+        // thành term riêng làm hai file index phình từ 4,3 MB lên 6,3 MB mà thứ tự kết quả gần như không đổi
+        // (hệ số phủ truy vấn bình phương đã làm gần hết việc). Chỉ dùng ở bước xếp lại trong ReverseSearchService.
         Set<String> compoundWords = mineCompounds(sorted, MIN_COMPOUND_COUNT);
         ViCompounds.write(targetDir.resolve(ViCompounds.FILE_NAME), compoundWords);
 
         List<Stats> stats = new ArrayList<>(3);
-        stats.add(writeIndex(targetDir.resolve(IndexFormat.VI_INDEX), sorted,
-                IndexWriter::vietnameseTokens));
+        stats.add(writeIndex(targetDir.resolve(IndexFormat.VI_INDEX), sorted, IndexWriter::vietnameseTokens));
         stats.add(writeIndex(targetDir.resolve(IndexFormat.VI_NODIAC_INDEX), sorted,
                 e -> vietnameseTokens(e).stream().map(TextNormalizer::removeDiacritics).toList()));
         stats.add(writeIndex(targetDir.resolve(IndexFormat.TRIGRAM_INDEX), sorted,
@@ -96,77 +93,95 @@ public final class IndexWriter {
         return stats;
     }
 
-    /**
-     * Tim tu ghep tieng Viet bang cach dem cac PHUONG AN dich lap lai.
-     *
-     * <p>Moi phuong an trong mot dong nghia la mot don vi dich: dong "- trông nom, chăm sóc"
-     * cho hai don vi. Phuong an dai 2-3 am tiet ma lap lai o nhieu muc tu khac nhau thi gan
-     * nhu chac chan la mot tu ghep that, khong phai mot cum ngau nhien.
-     *
-     * <p>Do tren 200.060 dong nghia cua nguon: nguong 3 lan cho 16.592 tu, du ca "chăm sóc",
-     * "ngân hàng", "kế hoạch", "máy tính". Ha xuong 2 lan thi duoc 31.438 tu nhung bat dau
-     * lan cac cum ngau nhien; len 4 lan thi con 10.585 va bat dau sot tu that.
-     */
-    public static Set<String> mineCompounds(List<Entry> entries, int minCount) {
+    // Tìm từ ghép tiếng Việt bằng cách đếm các phương án dịch lặp lại. Mỗi phương án trong một dòng nghĩa là một đơn vị
+    // dịch (dòng "- trông nom, chăm sóc" cho hai đơn vị); phương án dài 2-3 âm tiết mà lặp ở nhiều mục từ gần như chắc
+    // chắn là từ ghép thật. Đo trên 200.060 dòng nghĩa: ngưỡng 3 lần ra 16.592 từ (có "chăm sóc", "ngân hàng", "kế
+    // hoạch",
+    // "máy tính"); 2 lần ra 31.438 từ nhưng lẫn cụm ngẫu nhiên; 4 lần còn 10.585 và sót từ thật.
+    public static Set<String> mineCompounds(List<Entry> entries, int minCount)
+    {
         Map<String, Integer> count = new HashMap<>(1 << 17);
-        for (Entry e : entries) {
-            for (Sense s : e.senses()) for (String g : s.glosses()) countAlternatives(count, g);
-            for (Idiom i : e.idioms()) for (String g : i.glosses()) countAlternatives(count, g);
+        for (Entry e : entries)
+        {
+            for (Sense s : e.senses())
+                for (String g : s.glosses())
+                    countAlternatives(count, g);
+            for (Idiom i : e.idioms())
+                for (String g : i.glosses())
+                    countAlternatives(count, g);
         }
         Set<String> out = new HashSet<>(count.size() / 4);
-        for (Map.Entry<String, Integer> en : count.entrySet()) {
-            if (en.getValue() >= minCount) out.add(en.getKey());
+        for (Map.Entry<String, Integer> en : count.entrySet())
+        {
+            if (en.getValue() >= minCount)
+                out.add(en.getKey());
         }
         return out;
     }
 
-    private static void countAlternatives(Map<String, Integer> count, String gloss) {
-        for (String alt : TextNormalizer.glossAlternatives(gloss)) {
+    private static void countAlternatives(Map<String, Integer> count, String gloss)
+    {
+        for (String alt : TextNormalizer.glossAlternatives(gloss))
+        {
             List<String> syllables = TextNormalizer.splitTokens(alt);
-            if (syllables.size() < 2 || syllables.size() > ViCompounds.MAX_SYLLABLES) continue;
+            if (syllables.size() < 2 || syllables.size() > ViCompounds.MAX_SYLLABLES)
+                continue;
             boolean allLetters = true;
-            for (String syl : syllables) {
-                for (int i = 0; i < syl.length(); i++) {
-                    if (!Character.isLetter(syl.charAt(i))) { allLetters = false; break; }
+            for (String syl : syllables)
+            {
+                for (int i = 0; i < syl.length(); i++)
+                {
+                    if (!Character.isLetter(syl.charAt(i)))
+                    {
+                        allLetters = false;
+                        break;
+                    }
                 }
-                if (!allLetters) break;
+                if (!allLetters)
+                    break;
             }
-            if (allLetters) count.merge(String.join(" ", syllables), 1, Integer::sum);
+            if (allLetters)
+                count.merge(String.join(" ", syllables), 1, Integer::sum);
         }
     }
 
-    /**
-     * Toan bo token tieng Viet cua mot entry: nghia cua sense + nghia cua thanh ngu.
-     *
-     * <p>KHONG lay ban dich cua vi du: chung dai, nhieu tu chuc nang, se lam loang
-     * diem BM25 va phong index len gap ba.
-     */
-    static List<String> vietnameseTokens(Entry e) {
+    // Mọi token tiếng Việt của một entry: nghĩa của sense và nghĩa của thành ngữ.
+    // Không lấy bản dịch của ví dụ vì dài, nhiều từ chức năng, làm loãng điểm BM25 và phình index gấp ba.
+    static List<String> vietnameseTokens(Entry e)
+    {
         List<String> out = new ArrayList<>(16);
-        for (Sense s : e.senses()) {
-            for (String g : s.glosses()) out.addAll(TextNormalizer.splitTokens(g));
+        for (Sense s : e.senses())
+        {
+            for (String g : s.glosses())
+                out.addAll(TextNormalizer.splitTokens(g));
         }
-        for (Idiom i : e.idioms()) {
-            for (String g : i.glosses()) out.addAll(TextNormalizer.splitTokens(g));
+        for (Idiom i : e.idioms())
+        {
+            for (String g : i.glosses())
+                out.addAll(TextNormalizer.splitTokens(g));
         }
         return out;
     }
 
-    private static Stats writeIndex(Path target, List<Entry> docs, Function<Entry, List<String>> tokenizer) {
+    private static Stats writeIndex(Path target, List<Entry> docs, Function<Entry, List<String>> tokenizer)
+    {
         Map<String, IntList> postings = new HashMap<>(1 << 16);
         int[] docLengths = new int[docs.size()];
         long totalTokens = 0;
         long pairCount = 0;
 
         Map<String, Integer> tf = new HashMap<>(64);
-        for (int docId = 0; docId < docs.size(); docId++) {
+        for (int docId = 0; docId < docs.size(); docId++)
+        {
             List<String> tokens = tokenizer.apply(docs.get(docId));
             docLengths[docId] = Math.min(tokens.size(), IndexFormat.MAX_DOC_LENGTH);
             totalTokens += tokens.size();
 
             tf.clear();
-            for (String t : tokens) tf.merge(t, 1, Integer::sum);
-            for (Map.Entry<String, Integer> en : tf.entrySet()) {
+            for (String t : tokens)
+                tf.merge(t, 1, Integer::sum);
+            for (Map.Entry<String, Integer> en : tf.entrySet())
+            {
                 IntList list = postings.computeIfAbsent(en.getKey(), k -> new IntList());
                 list.add(docId);
                 list.add(en.getValue());
@@ -177,14 +192,15 @@ public final class IndexWriter {
         List<String> terms = new ArrayList<>(postings.keySet());
         terms.sort(Utf8Compare.COMPARATOR);
 
-        // TERMS + POSTINGS dung truoc de biet do dai, roi moi ghi file mot luot.
+        // TERMS và POSTINGS dựng trước để biết độ dài, rồi mới ghi file một lượt.
         ByteArrayOutputStream termsRegion = new ByteArrayOutputStream(terms.size() * 12);
         ByteArrayOutputStream postingsRegion = new ByteArrayOutputStream((int) pairCount * 3);
         int[] termOffsets = new int[terms.size()];
         int[] docFreqs = new int[terms.size()];
         long[] postingOffsets = new long[terms.size()];
 
-        for (int i = 0; i < terms.size(); i++) {
+        for (int i = 0; i < terms.size(); i++)
+        {
             String term = terms.get(i);
             termOffsets[i] = termsRegion.size();
             byte[] tb = term.getBytes(StandardCharsets.UTF_8);
@@ -193,15 +209,17 @@ public final class IndexWriter {
 
             IntList list = postings.get(term);
             docFreqs[i] = list.size() / 2;
-            postingOffsets[i] = postingsRegion.size();          // tam thoi tuong doi, cong base sau
+            postingOffsets[i] = postingsRegion.size(); // tạm thời tương đối, cộng base sau
             int prevDoc = 0;
-            for (int k = 0; k < list.size(); k += 2) {
+            for (int k = 0; k < list.size(); k += 2)
+            {
                 int delta = list.get(k) - prevDoc;
                 int freq = list.get(k + 1);
-                // Bit thap nhat = "con byte tf dang sau". 85% cap co tf = 1 nen bo han
-                // byte tf di, tiet kiem gan 1 MB tren ba file index.
+                // Bit thấp nhất = "còn byte tf đằng sau". 85% cặp có tf = 1 nên bỏ hẳn byte tf, tiết kiệm gần 1 MB trên
+                // ba file index.
                 VarInt.write(postingsRegion, (delta << 1) | (freq > 1 ? 1 : 0));
-                if (freq > 1) VarInt.write(postingsRegion, freq);
+                if (freq > 1)
+                    VarInt.write(postingsRegion, freq);
                 prevDoc = list.get(k);
             }
         }
@@ -216,9 +234,11 @@ public final class IndexWriter {
 
         float avgDocLen = docs.isEmpty() ? 1f : (float) ((double) totalTokens / docs.size());
 
-        try {
+        try
+        {
             Files.createDirectories(targetDir(target));
-            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(target), 1 << 16)) {
+            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(target), 1 << 16))
+            {
                 ByteBuffer h = le(IndexFormat.HEADER_SIZE);
                 h.put(IndexFormat.MAGIC);
                 h.putInt(IndexFormat.OFF_TERM_COUNT, terms.size());
@@ -232,7 +252,8 @@ public final class IndexWriter {
                 out.write(termsBytes);
 
                 ByteBuffer ptrs = le(terms.size() * IndexFormat.TERM_PTR_SIZE);
-                for (int i = 0; i < terms.size(); i++) {
+                for (int i = 0; i < terms.size(); i++)
+                {
                     ptrs.putInt(termOffsets[i]);
                     ptrs.putInt(docFreqs[i]);
                     ptrs.putLong(postingsBase + postingOffsets[i]);
@@ -240,24 +261,28 @@ public final class IndexWriter {
                 out.write(ptrs.array());
 
                 ByteBuffer lens = le(docs.size() * 2);
-                for (int len : docLengths) lens.putShort((short) len);
+                for (int len : docLengths)
+                    lens.putShort((short) len);
                 out.write(lens.array());
 
                 out.write(postingsBytes);
             }
-            return new Stats(target.getFileName().toString(), terms.size(), docs.size(),
-                    pairCount, Files.size(target));
-        } catch (IOException e) {
-            throw new UncheckedIOException("khong ghi duoc " + target, e);
+            return new Stats(target.getFileName().toString(), terms.size(), docs.size(), pairCount, Files.size(target));
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException("cannot write " + target, e);
         }
     }
 
-    private static Path targetDir(Path target) {
+    private static Path targetDir(Path target)
+    {
         Path parent = target.toAbsolutePath().getParent();
         return parent == null ? Path.of(".") : parent;
     }
 
-    private static ByteBuffer le(int size) {
+    private static ByteBuffer le(int size)
+    {
         return ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
     }
 }

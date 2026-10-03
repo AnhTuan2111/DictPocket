@@ -4,81 +4,58 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Bang TU CHUC NANG tieng Anh, dich cung va phan loai san.
- *
- * <h2>Vi sao phai co bang nay thay vi tra tu dien</h2>
- * Tu chuc nang la nhom tu XUAT HIEN NHIEU NHAT trong moi cau, va cung la nhom ma tu dien
- * dich TE NHAT. Do thuc te tren chinh du lieu cua du an:
- * <pre>
- *   he   -> "nó, anh ấy, ông ấy... (chỉ người và động vật giống đực)"
- *   the  -> "cái, con, người..."
- *   could-> "bình, bi đông, ca (đựng nước)"      (muc tu @could cua nguon bi hong)
- * </pre>
- * Nhet nguyen nhung chuoi do vao cau dich thi khong con gi doc duoc. Trong khi do nhom nay
- * la LOP DONG - tieng Anh co khoang 200 tu chuc nang va gan nhu khong bao gio them tu moi -
- * nen dich cung mot lan la xong vinh vien.
- *
- * <p>{@link Category} khong chi de dep: bo luat trat tu tu trong
- * {@code RuleBasedTranslationEngine} dua han vao no de biet cai gi dao ra sau danh tu,
- * cai gi bo di, cai gi ghep voi dong tu.
- */
-public final class FunctionWords {
+// Bảng từ chức năng tiếng Anh, dịch cứng và phân loại sẵn. Nhóm này xuất hiện nhiều nhất
+// mà từ điển dịch tệ nhất (vd "the" -> "cái, con, người..."), nhưng là lớp đóng (~200 từ).
+// Category được bộ luật trật tự từ trong RuleBasedTranslationEngine dùng để đảo/bỏ/ghép.
+public final class FunctionWords
+{
 
-    private FunctionWords() {}
+    private FunctionWords()
+    {
+    }
 
-    public enum Category {
-        /** Mao tu - tieng Viet khong co, BO HAN: "the old system" -> "hệ thống cũ". */
+    public enum Category
+    {
+        // Mạo từ: tiếng Việt không có, bỏ hẳn ("the old system" -> "hệ thống cũ").
         ARTICLE,
-        /** Luong tu dung truoc danh tu: some, many, all. */
+        // Lượng từ đứng trước danh từ: some, many, all.
         QUANTIFIER,
-        /** Chi dinh tu - dao ra SAU danh tu: "this system" -> "hệ thống này". */
-        DEMONSTRATIVE,
-        /** Dai tu nhan xung. */
-        PRONOUN,
-        /** So huu - dao ra SAU danh tu: "his job" -> "công việc của anh ấy". */
+        // Chỉ định từ, đảo ra sau danh từ: "this system" -> "hệ thống này".
+        DEMONSTRATIVE, PRONOUN,
+        // Sở hữu, đảo ra sau danh từ: "his job" -> "công việc của anh ấy".
         POSSESSIVE,
-        /** to be - thuong bo di truoc tinh tu, giu "là" truoc danh tu. */
+        // to be: thường bỏ trước tính từ, giữ "là" trước danh từ.
         BE,
-        /** have/has/had - dau hieu thi hoan thanh. */
+        // have/has/had: dấu hiệu thì hoàn thành.
         HAVE,
-        /** do/does/did - tro dong tu rong, bo di tru khi phu dinh. */
-        DO,
-        /** Dong tu tinh thai: can, must, should... */
-        MODAL,
-        /** Dau hieu thi tuong lai. */
-        FUTURE,
-        /** not / n't. */
-        NEGATION,
-        GIOI_TU,
-        LIEN_TU,
-        /** Trang tu hay gap. */
-        TRANG_TU,
-        /** there (is/are) -> "có". */
+        // do/does/did: trợ động từ rỗng, bỏ trừ khi phủ định.
+        DO, MODAL, FUTURE, NEGATION, PREPOSITION, CONJUNCTION, ADVERB,
+        // there (is/are) -> "có".
         EXISTENTIAL,
-        /** "to" trong to-infinitive - bo di: "to leave" -> "rời đi". */
+        // "to" của to-infinitive, bỏ: "to leave" -> "rời đi".
         INFINITIVE
     }
 
-    /**
-     * @param vi  nghia tieng Viet; CHUOI RONG nghia la bo han tu nay khoi cau dich
-     * @param cat nhom, quyet dinh luat trat tu tu se ap dung
-     */
-    public record Fw(String vi, Category cat) {}
+    // vi rỗng nghĩa là bỏ hẳn từ này khỏi câu dịch; cat quyết định luật trật tự sẽ áp dụng.
+    public record Fw(String vi, Category cat)
+    {
+    }
 
     private static final Map<String, Fw> TABLE = new HashMap<>(256);
 
-    private static void put(String en, String vi, Category cat) {
+    private static void put(String en, String vi, Category cat)
+    {
         TABLE.put(en, new Fw(vi, cat));
     }
 
-    static {
-        // --- mao tu: bo han ---
+    static
+    {
+        // Mạo từ: bỏ hẳn.
         put("a", "", Category.ARTICLE);
         put("an", "", Category.ARTICLE);
         put("the", "", Category.ARTICLE);
 
-        // --- dai tu ---
+        // Đại từ.
         put("i", "tôi", Category.PRONOUN);
         put("you", "bạn", Category.PRONOUN);
         put("he", "anh ấy", Category.PRONOUN);
@@ -107,7 +84,7 @@ public final class FunctionWords {
         put("nobody", "không ai", Category.PRONOUN);
         put("nothing", "không gì", Category.PRONOUN);
 
-        // --- so huu: dao ra sau danh tu ---
+        // Sở hữu: đảo ra sau danh từ.
         put("my", "của tôi", Category.POSSESSIVE);
         put("your", "của bạn", Category.POSSESSIVE);
         put("his", "của anh ấy", Category.POSSESSIVE);
@@ -117,13 +94,13 @@ public final class FunctionWords {
         put("their", "của họ", Category.POSSESSIVE);
         put("whose", "của ai", Category.POSSESSIVE);
 
-        // --- chi dinh tu: dao ra sau danh tu ---
+        // Chỉ định từ: đảo ra sau danh từ.
         put("this", "này", Category.DEMONSTRATIVE);
         put("that", "đó", Category.DEMONSTRATIVE);
         put("these", "này", Category.DEMONSTRATIVE);
         put("those", "đó", Category.DEMONSTRATIVE);
 
-        // --- luong tu ---
+        // Lượng từ.
         put("some", "một số", Category.QUANTIFIER);
         put("any", "bất kỳ", Category.QUANTIFIER);
         put("all", "tất cả", Category.QUANTIFIER);
@@ -138,9 +115,8 @@ public final class FunctionWords {
         put("other", "khác", Category.QUANTIFIER);
         put("another", "một cái khác", Category.QUANTIFIER);
         put("such", "như vậy", Category.QUANTIFIER);
-        // So dem. Thieu chung thi chung bi tra tu dien nhu danh tu thuong, va nghia dau bang
-        // cua "four" trong nguon 109K la "chứng khoán lãi 4 qịu (sử học) bốn xu rượu" - da do
-        // that voi "the four stages". Them ca cum truoc danh tu cho dung trat tu tieng Viet.
+        // Số đếm: thiếu thì bị tra từ điển như danh từ (nghĩa đầu của "four" trong nguồn là
+        // "chứng khoán lãi 4 qịu...").
         put("one", "một", Category.QUANTIFIER);
         put("two", "hai", Category.QUANTIFIER);
         put("three", "ba", Category.QUANTIFIER);
@@ -162,7 +138,7 @@ public final class FunctionWords {
         put("million", "triệu", Category.QUANTIFIER);
         put("billion", "tỷ", Category.QUANTIFIER);
 
-        // --- to be ---
+        // to be.
         put("am", "là", Category.BE);
         put("is", "là", Category.BE);
         put("are", "là", Category.BE);
@@ -172,7 +148,7 @@ public final class FunctionWords {
         put("been", "là", Category.BE);
         put("being", "là", Category.BE);
 
-        // --- have / do ---
+        // have / do.
         put("have", "đã", Category.HAVE);
         put("has", "đã", Category.HAVE);
         put("had", "đã", Category.HAVE);
@@ -180,7 +156,7 @@ public final class FunctionWords {
         put("does", "", Category.DO);
         put("did", "", Category.DO);
 
-        // --- tinh thai va tuong lai ---
+        // Tình thái và tương lai.
         put("can", "có thể", Category.MODAL);
         put("could", "có thể", Category.MODAL);
         put("may", "có thể", Category.MODAL);
@@ -193,118 +169,120 @@ public final class FunctionWords {
         put("shall", "sẽ", Category.FUTURE);
         put("would", "sẽ", Category.FUTURE);
 
-        // --- phu dinh ---
+        // Phủ định.
         put("not", "không", Category.NEGATION);
         put("n't", "không", Category.NEGATION);
         put("no", "không", Category.NEGATION);
         put("never", "không bao giờ", Category.NEGATION);
         put("cannot", "không thể", Category.NEGATION);
 
-        // --- gioi tu ---
-        put("of", "của", Category.GIOI_TU);
-        put("in", "trong", Category.GIOI_TU);
-        put("on", "trên", Category.GIOI_TU);
-        put("at", "tại", Category.GIOI_TU);
-        put("to", "đến", Category.GIOI_TU);
-        put("for", "cho", Category.GIOI_TU);
-        put("with", "với", Category.GIOI_TU);
-        put("from", "từ", Category.GIOI_TU);
-        put("by", "bởi", Category.GIOI_TU);
-        put("about", "về", Category.GIOI_TU);
-        put("into", "vào", Category.GIOI_TU);
-        put("onto", "lên", Category.GIOI_TU);
-        put("over", "trên", Category.GIOI_TU);
-        put("under", "dưới", Category.GIOI_TU);
-        put("above", "phía trên", Category.GIOI_TU);
-        put("below", "phía dưới", Category.GIOI_TU);
-        put("between", "giữa", Category.GIOI_TU);
-        put("among", "trong số", Category.GIOI_TU);
-        put("through", "qua", Category.GIOI_TU);
-        put("during", "trong suốt", Category.GIOI_TU);
-        // Phan tu hien tai lam gioi tu. Tu dien ghi chung la tinh tu, nen khong chot o day thi
-        // buoc sap lai danh ngu day chung ra sau danh tu: "including preconditions" ra
-        // "điều kiện tiên quyết kể cả". Day la tap dong, liet ke duoc het.
-        put("including", "gồm cả", Category.GIOI_TU);
-        put("excluding", "không tính", Category.GIOI_TU);
-        put("regarding", "về", Category.GIOI_TU);
-        put("concerning", "về", Category.GIOI_TU);
-        put("considering", "xét đến", Category.GIOI_TU);
-        put("depending on", "tuỳ theo", Category.GIOI_TU);
-        put("without", "không có", Category.GIOI_TU);
-        put("against", "chống lại", Category.GIOI_TU);
-        put("towards", "về phía", Category.GIOI_TU);
-        put("toward", "về phía", Category.GIOI_TU);
-        put("upon", "trên", Category.GIOI_TU);
-        put("within", "trong vòng", Category.GIOI_TU);
-        put("across", "băng qua", Category.GIOI_TU);
-        put("around", "quanh", Category.GIOI_TU);
-        put("near", "gần", Category.GIOI_TU);
-        put("off", "khỏi", Category.GIOI_TU);
-        put("out", "ra", Category.GIOI_TU);
-        put("up", "lên", Category.GIOI_TU);
-        put("down", "xuống", Category.GIOI_TU);
+        // Giới từ.
+        put("of", "của", Category.PREPOSITION);
+        put("in", "trong", Category.PREPOSITION);
+        put("on", "trên", Category.PREPOSITION);
+        put("at", "tại", Category.PREPOSITION);
+        put("to", "đến", Category.PREPOSITION);
+        put("for", "cho", Category.PREPOSITION);
+        put("with", "với", Category.PREPOSITION);
+        put("from", "từ", Category.PREPOSITION);
+        put("by", "bởi", Category.PREPOSITION);
+        put("about", "về", Category.PREPOSITION);
+        put("into", "vào", Category.PREPOSITION);
+        put("onto", "lên", Category.PREPOSITION);
+        put("over", "trên", Category.PREPOSITION);
+        put("under", "dưới", Category.PREPOSITION);
+        put("above", "phía trên", Category.PREPOSITION);
+        put("below", "phía dưới", Category.PREPOSITION);
+        put("between", "giữa", Category.PREPOSITION);
+        put("among", "trong số", Category.PREPOSITION);
+        put("through", "qua", Category.PREPOSITION);
+        put("during", "trong suốt", Category.PREPOSITION);
+        // Phân từ hiện tại làm giới từ: từ điển ghi là tính từ nên bước sắp lại danh ngữ sẽ đẩy
+        // chúng ra sau danh từ ("including preconditions" -> "điều kiện tiên quyết kể cả").
+        put("including", "gồm cả", Category.PREPOSITION);
+        put("excluding", "không tính", Category.PREPOSITION);
+        put("regarding", "về", Category.PREPOSITION);
+        put("concerning", "về", Category.PREPOSITION);
+        put("considering", "xét đến", Category.PREPOSITION);
+        put("depending on", "tuỳ theo", Category.PREPOSITION);
+        put("without", "không có", Category.PREPOSITION);
+        put("against", "chống lại", Category.PREPOSITION);
+        put("towards", "về phía", Category.PREPOSITION);
+        put("toward", "về phía", Category.PREPOSITION);
+        put("upon", "trên", Category.PREPOSITION);
+        put("within", "trong vòng", Category.PREPOSITION);
+        put("across", "băng qua", Category.PREPOSITION);
+        put("around", "quanh", Category.PREPOSITION);
+        put("near", "gần", Category.PREPOSITION);
+        put("off", "khỏi", Category.PREPOSITION);
+        put("out", "ra", Category.PREPOSITION);
+        put("up", "lên", Category.PREPOSITION);
+        put("down", "xuống", Category.PREPOSITION);
 
-        // --- lien tu ---
-        put("and", "và", Category.LIEN_TU);
-        put("or", "hoặc", Category.LIEN_TU);
-        put("but", "nhưng", Category.LIEN_TU);
-        put("because", "bởi vì", Category.LIEN_TU);
-        put("if", "nếu", Category.LIEN_TU);
-        put("unless", "trừ khi", Category.LIEN_TU);
-        put("when", "khi", Category.LIEN_TU);
-        put("while", "trong khi", Category.LIEN_TU);
-        put("since", "kể từ khi", Category.LIEN_TU);
-        put("until", "cho đến khi", Category.LIEN_TU);
-        put("although", "mặc dù", Category.LIEN_TU);
-        put("though", "mặc dù", Category.LIEN_TU);
-        put("however", "tuy nhiên", Category.LIEN_TU);
-        put("therefore", "do đó", Category.LIEN_TU);
-        put("so", "nên", Category.LIEN_TU);
-        put("than", "hơn", Category.LIEN_TU);
-        put("as", "như", Category.LIEN_TU);
-        put("whether", "liệu", Category.LIEN_TU);
-        put("where", "nơi", Category.LIEN_TU);
-        put("why", "tại sao", Category.LIEN_TU);
-        put("how", "như thế nào", Category.LIEN_TU);
-        put("which", "cái nào", Category.LIEN_TU);
+        // Liên từ.
+        put("and", "và", Category.CONJUNCTION);
+        put("or", "hoặc", Category.CONJUNCTION);
+        put("but", "nhưng", Category.CONJUNCTION);
+        put("because", "bởi vì", Category.CONJUNCTION);
+        put("if", "nếu", Category.CONJUNCTION);
+        put("unless", "trừ khi", Category.CONJUNCTION);
+        put("when", "khi", Category.CONJUNCTION);
+        put("while", "trong khi", Category.CONJUNCTION);
+        put("since", "kể từ khi", Category.CONJUNCTION);
+        put("until", "cho đến khi", Category.CONJUNCTION);
+        put("although", "mặc dù", Category.CONJUNCTION);
+        put("though", "mặc dù", Category.CONJUNCTION);
+        put("however", "tuy nhiên", Category.CONJUNCTION);
+        put("therefore", "do đó", Category.CONJUNCTION);
+        put("so", "nên", Category.CONJUNCTION);
+        put("than", "hơn", Category.CONJUNCTION);
+        put("as", "như", Category.CONJUNCTION);
+        put("whether", "liệu", Category.CONJUNCTION);
+        put("where", "nơi", Category.CONJUNCTION);
+        put("why", "tại sao", Category.CONJUNCTION);
+        put("how", "như thế nào", Category.CONJUNCTION);
+        put("which", "cái nào", Category.CONJUNCTION);
 
-        // --- trang tu hay gap ---
-        put("very", "rất", Category.TRANG_TU);
-        put("too", "quá", Category.TRANG_TU);
-        put("also", "cũng", Category.TRANG_TU);
-        put("only", "chỉ", Category.TRANG_TU);
-        put("just", "chỉ", Category.TRANG_TU);
-        put("still", "vẫn", Category.TRANG_TU);
-        put("already", "đã", Category.TRANG_TU);
-        put("yet", "chưa", Category.TRANG_TU);
-        put("now", "bây giờ", Category.TRANG_TU);
-        put("then", "sau đó", Category.TRANG_TU);
-        put("always", "luôn luôn", Category.TRANG_TU);
-        put("often", "thường", Category.TRANG_TU);
-        put("sometimes", "đôi khi", Category.TRANG_TU);
-        put("usually", "thường", Category.TRANG_TU);
-        put("again", "lại", Category.TRANG_TU);
-        put("here", "ở đây", Category.TRANG_TU);
-        put("more", "hơn", Category.TRANG_TU);
-        put("most", "nhất", Category.TRANG_TU);
-        put("well", "tốt", Category.TRANG_TU);
-        put("soon", "sớm", Category.TRANG_TU);
-        put("today", "hôm nay", Category.TRANG_TU);
-        put("yesterday", "hôm qua", Category.TRANG_TU);
-        put("tomorrow", "ngày mai", Category.TRANG_TU);
+        // Trạng từ hay gặp.
+        put("very", "rất", Category.ADVERB);
+        put("too", "quá", Category.ADVERB);
+        put("also", "cũng", Category.ADVERB);
+        put("only", "chỉ", Category.ADVERB);
+        put("just", "chỉ", Category.ADVERB);
+        put("still", "vẫn", Category.ADVERB);
+        put("already", "đã", Category.ADVERB);
+        put("yet", "chưa", Category.ADVERB);
+        put("now", "bây giờ", Category.ADVERB);
+        put("then", "sau đó", Category.ADVERB);
+        put("always", "luôn luôn", Category.ADVERB);
+        put("often", "thường", Category.ADVERB);
+        put("sometimes", "đôi khi", Category.ADVERB);
+        put("usually", "thường", Category.ADVERB);
+        put("again", "lại", Category.ADVERB);
+        put("here", "ở đây", Category.ADVERB);
+        put("more", "hơn", Category.ADVERB);
+        put("most", "nhất", Category.ADVERB);
+        put("well", "tốt", Category.ADVERB);
+        put("soon", "sớm", Category.ADVERB);
+        put("today", "hôm nay", Category.ADVERB);
+        put("yesterday", "hôm qua", Category.ADVERB);
+        put("tomorrow", "ngày mai", Category.ADVERB);
 
         put("there", "có", Category.EXISTENTIAL);
     }
 
-    public static Fw get(String word) {
+    public static Fw get(String word)
+    {
         return word == null ? null : TABLE.get(word.toLowerCase(Locale.ROOT));
     }
 
-    public static boolean isFunctionWord(String word) {
+    public static boolean isFunctionWord(String word)
+    {
         return get(word) != null;
     }
 
-    public static int size() {
+    public static int size()
+    {
         return TABLE.size();
     }
 }
