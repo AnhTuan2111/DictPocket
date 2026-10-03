@@ -11,10 +11,17 @@ import java.util.List;
  * <p>Thu tu tim, dung ngay khi thay dict.pack:
  * <ol>
  *   <li>{@code -Ddict.data=<duong dan>} - de chay tu IDE hoac chi ra du lieu khac</li>
- *   <li>{@code ./data/build} va {@code ../data/build} - khi chay tu trong ma nguon</li>
  *   <li>{@code <thu muc cai dat>/app/data} - khi chay ban da jpackage</li>
+ *   <li>{@code ./data/build} va {@code ../data/build} - khi chay tu trong ma nguon</li>
  *   <li>{@code ~/.offline-dict/data} - noi nguoi dung tu dat them tu dien (F5)</li>
  * </ol>
+ *
+ * <p>Du lieu DI KEM ban cai phai duoc xet TRUOC hai duong dan tuong doi, vi hai duong dan do
+ * tinh theo THU MUC HIEN HANH chu khong theo cho dat ung dung. Luc dau xep nguoc lai va da
+ * do that: mo ban portable tu mot cua so dong lenh dang dung o thu muc ma nguon thi no doc
+ * du lieu cua ma nguon, khong doc du lieu minh mang theo - ma thanh trang thai van bao la
+ * chay binh thuong. Dung tren may nguoi dung vi ho khong co thu muc do, nhung day van la
+ * mot ung dung doc nham du lieu ma khong he keu len mot tieng.
  */
 public final class DataLocator {
 
@@ -42,9 +49,9 @@ public final class DataLocator {
         List<Path> out = new ArrayList<>(6);
         String prop = System.getProperty(PROPERTY);
         if (prop != null && !prop.isBlank()) out.add(Path.of(prop));
+        out.add(appDir().resolve("data"));
         out.add(Path.of("data", "build"));
         out.add(Path.of("..", "data", "build"));
-        out.add(appDir().resolve("data"));
         out.add(Path.of(System.getProperty("user.home"), ".offline-dict", "data"));
         return out;
     }
