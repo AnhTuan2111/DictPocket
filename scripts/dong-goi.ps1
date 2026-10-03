@@ -42,15 +42,31 @@ if (-not (Test-Path (Join-Path $dataDir "dict.pack"))) {
 }
 
 Write-Host "==> Bien dich va dong goi jar..." -ForegroundColor Cyan
-& mvn -q -DskipTests package "-Ddict.edition=$edition"
+# PHAI co `clean`. Ten file jar co mang so phien ban, nen doi phien ban roi build lai ma
+# khong clean thi target\ con ca jar CU lan jar MOI. Doan Copy-Item ben duoi lay jar bang
+# wildcard, va khi wildcard khop nhieu file thi file cuoi thang - tuc la jar cu.
+# Ban v1.0.0 da phat hanh nham kieu nay: bo cai ghi dung 1.0.0 nhung app ben trong la jar
+# 1.0.1-SNAPSHOT con sot tu lan build truoc, thanh tieu de hien "v1.0.1-SNAPSHOT".
+& mvn -q -DskipTests clean package "-Ddict.edition=$edition"
 if ($LASTEXITCODE -ne 0) { throw "mvn package that bai" }
 
 # --- dung thu muc nguyen lieu ---
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stage, "$stage\javafx", "$stage\data" | Out-Null
 
-Copy-Item "app-desktop\target\app-desktop-*.jar" "$stage\app-desktop.jar"
-Copy-Item "dict-core\target\dict-core-*.jar"     "$stage\dict-core.jar"
+# Chep DUNG mot jar. `clean` o tren da lo cho khong con jar cu, nhung day la chot chan thu
+# hai: neu vi ly do gi ma target\ lai co hai jar, thi dung han chu khong am tham chep nham
+# roi dong goi ra mot ban cai sai - dung kieu loi da lam hong ban v1.0.0.
+function Copy-OneJar($pattern, $dest) {
+    $found = @(Get-ChildItem $pattern -ErrorAction SilentlyContinue)
+    if ($found.Count -ne 1) {
+        throw "Mong doi dung 1 jar khop '$pattern' nhung thay $($found.Count): $($found.Name -join ', '). Chay `mvn clean` roi lam lai."
+    }
+    Copy-Item $found[0].FullName $dest
+}
+
+Copy-OneJar "app-desktop\target\app-desktop-*.jar" "$stage\app-desktop.jar"
+Copy-OneJar "dict-core\target\dict-core-*.jar"     "$stage\dict-core.jar"
 Copy-Item "$dataDir\*" "$stage\data\" -Recurse -Exclude "nmt-en-vi"
 
 # Mo hinh AI: chi kem khi duoc yeu cau. No nang gan gap doi ca ung dung con lai.
@@ -59,7 +75,7 @@ if ($WithNmt) {
     if (-not (Test-Path $nmtSrc)) { throw "Chua co mo hinh. Chay: .\scripts\tai-model-nmt.ps1" }
     Write-Host "==> Kem theo mo hinh AI (98 MB)..." -ForegroundColor Yellow
     Copy-Item $nmtSrc "$stage\data\nmt-en-vi" -Recurse
-    Copy-Item "nmt-engine\target\nmt-engine-*.jar" "$stage\nmt-engine.jar"
+    Copy-OneJar "nmt-engine\target\nmt-engine-*.jar" "$stage\nmt-engine.jar"
     $onnxDir = Join-Path $env:USERPROFILE ".m2\repository\com\microsoft\onnxruntime\onnxruntime"
     $onnxJar = Get-ChildItem $onnxDir -Recurse -Filter "onnxruntime-*.jar" | Select-Object -First 1
     if (-not $onnxJar) { throw "Khong thay jar ONNX Runtime trong kho Maven" }
@@ -135,7 +151,17 @@ $ico = Join-Path $root "app-desktop\src\main\resources\icon\$icoName"
 if (Test-Path $ico) { $jpArgs += @("--icon", $ico) }
 else { Write-Host "   (khong thay $icoName, dung icon Java mac dinh)" -ForegroundColor Yellow }
 
-if ($Type -ne "app-image") { $jpArgs += @("--win-dir-chooser", "--win-menu", "--win-shortcut") }
+# --win-per-user-install: cai vao %LOCALAPPDATA% cua rieng nguoi dung, KHONG can quyen
+# administrator. Mac dinh cua jpackage la cai cho ca may, va tren may khong co quyen admin
+# thi bo cai chet voi "Error 1925 - You do not have sufficient privileges". Nguoi dung cua
+# ung dung nay phan lon la sinh vien dung may truong hoac may cong ty, khong co quyen do.
+#
+# --win-menu-group: khong khai bao thi jpackage xep shortcut vao thu muc Start Menu ten la
+# "Unknown". Da cai thu va thay dung nhu vay.
+if ($Type -ne "app-image") {
+    $jpArgs += @("--win-dir-chooser", "--win-menu", "--win-menu-group", "Tu dien offline",
+                 "--win-shortcut", "--win-per-user-install")
+}
 
 & jpackage @jpArgs
 if ($LASTEXITCODE -ne 0) {
