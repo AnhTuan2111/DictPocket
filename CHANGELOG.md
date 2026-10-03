@@ -7,19 +7,50 @@ Mỗi bản phát hành có **hai gói**, cùng một mã nguồn:
 
 | Gói | Có gì | Kích thước |
 |---|---|---|
-| `TuDienOffline-<ver>.msi` | Từ điển + dịch câu bằng luật. **Không có mô hình AI nào.** | ~46 MB |
-| `TuDienOffline-AI-<ver>.msi` | Kèm mô hình nơ-ron dịch câu chạy cục bộ | ~185 MB |
+| `DictPocket-Setup.msi` | Từ điển + dịch câu bằng luật. **Không có mô hình AI nào.** | ~46 MB |
+| `DictPocket-AI-Setup.msi` | Kèm mô hình nơ-ron dịch câu chạy cục bộ | ~185 MB |
+| `DictPocket-Portable.zip` | Giải nén là chạy, không cần cài | ~45 MB |
 
 Cả hai đều chạy **hoàn toàn offline** — không có một dòng mã nào mở kết nối mạng.
+Tên file không mang số phiên bản, nên link tải trong README luôn đúng với bản mới nhất.
 
 ---
 
 ## [Chưa phát hành]
 
-### Thêm
-- `phat-hanh.ps1` chặn nếu không đứng trên nhánh `main` (bỏ qua bằng `-AllowAnyBranch`).
+
+## [1.1.0] — 2026-10-04
+
+### Dành cho người dùng
+- **Đổi tên thành DictPocket.** Phần mềm trước đây tên "Từ điển offline Anh - Việt" (file
+  `TuDienOffline`).
+- **Giao diện mới kiểu Windows 9x**: nền xám, viền nổi, icon pixel vẽ tay, thanh tiêu đề xanh.
+  Ba chế độ tra có nút icon lớn; kết quả, ô chú giải, danh sách Việt → Anh và hộp thoại
+  Nguồn từ điển đều đổi theo.
+- Tên các nguồn từ điển hiện bằng tiếng Việt ("Thuật ngữ CNTT", "Thuật ngữ y tế") thay vì
+  tên file.
+- Bộ cài có **mã nâng cấp cố định**: từ bản sau, cài đè lên bản cũ sẽ thay thế chứ không
+  cài thêm một bản nữa.
+
+> **Đang dùng bản cũ (TuDienOffline)?** DictPocket là một ứng dụng riêng, cài xong bản cũ
+> vẫn còn. Muốn gỡ: **Settings → Apps → Installed apps → TuDienOffline → Uninstall**. Từ điển
+> nằm trong thư mục cài nên không có dữ liệu cá nhân nào bị mất.
+
+### Cho lập trình viên
+- Cửa sổ vẽ tay (thanh tiêu đề, nút thu nhỏ / phóng to / đóng, đổi cỡ) thay cho khung hệ
+  điều hành. Vẫn chỉ phụ thuộc `javafx-controls`; toàn bộ phần icon nặng chưa tới 12 KB.
+- Toàn bộ mã nguồn chuyển sang kiểu ngoặc Allman; thêm `.editorconfig` cho IntelliJ.
+- Comment tinh gọn lại thành `//` tiếng Việt có dấu; thông báo lỗi, tên test, tên file,
+  script và tên hằng đều bằng tiếng Anh.
+- Đổi tên script: `package.ps1`, `release.ps1`, `download-nmt-model.ps1`, `train-lexicon.ps1`,
+  `generate-icons.py` (không còn cần Pillow).
+- Tên file phát hành cố định (`DictPocket-Setup.msi`...) để link tải không hỏng mỗi lần lên bản.
+- `release.ps1` chặn nếu không đứng trên nhánh `main` (bỏ qua bằng `-AllowAnyBranch`).
   Script gắn thẻ vào đúng chỗ `HEAD` đang đứng, nên chạy nhầm nhánh thì thẻ nằm trên
   `develop` còn `main` vẫn ở bản cũ — đã vấp đúng vậy khi phát hành `v1.0.1`.
+- `run.ps1 -Rebuild` nạp luôn các nguồn phụ trong `data\*.tsv`; thêm `-Screenshot` để chụp
+  cửa sổ ra PNG (dùng cho ảnh trong README) và `-NoNmt` để chạy như bản thường.
+- Một nguồn `.tsv` khai báo tên hiển thị bằng dòng `# name: ...` đầu file.
 
 
 ## [1.0.1] — 2026-10-03
@@ -114,6 +145,7 @@ Bản phát hành đầu tiên.
 - **Nhét từ ghép tiếng Việt vào chỉ mục**: làm xong, đo, thấy chỉ mục phình 47% mà thứ tự
   kết quả gần như không đổi → bỏ. Danh sách từ ghép chuyển sang dùng cho gợi ý chính tả.
 
-[Chưa phát hành]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.1...HEAD
+[Chưa phát hành]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/AnhTuan2111/offline-translate-vi-en/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AnhTuan2111/offline-translate-vi-en/releases/tag/v1.0.0
