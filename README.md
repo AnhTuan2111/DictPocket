@@ -1,186 +1,73 @@
-<img src="app-desktop/src/main/resources/icon/app-256.png" width="110" align="right" alt="">
+<p align="center"><img src="docs/screenshots/banner.png" width="920" alt="DictPocket: từ điển và dịch câu Anh–Việt, dùng hoàn toàn offline"></p>
 
-# Từ điển & dịch offline Anh–Việt
+<p align="center">
+<a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-Setup.msi"><img src="docs/screenshots/btn-download.png" width="430" alt="Tải DictPocket, bản thường 46 MB"></a>
+<a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-AI-Setup.msi"><img src="docs/screenshots/btn-download-ai.png" width="430" alt="Tải DictPocket AI, 185 MB"></a>
+</p>
 
-Tra từ và dịch câu tiếng Anh **không cần mạng**. Không tài khoản, không quảng cáo,
-không gửi gì ra ngoài. Dành cho Windows 10/11.
+<p align="center">
+Hầu hết mọi người nên chọn <b>bản thường</b>. Bản <b>AI</b> thêm bộ dịch máy chạy ngay trên máy bạn, dịch câu dài mượt hơn nhưng lâu hơn nửa giây mỗi câu.<br>
+Không muốn cài? <a href="https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/DictPocket-Portable.zip">Bản chạy thẳng (45 MB)</a>: giải nén, bấm <code>DictPocket.exe</code>, xoá thư mục là sạch.
+</p>
 
-<br clear="right">
+> **Đừng bấm nút `Code` màu xanh** hay hai dòng `Source code` ở trang Releases: đó là mã nguồn, không có phần mềm.
 
-## ⬇ Tải về
+![Xem trước](docs/screenshots/h-preview.png)
 
-### [**▶ TẢI BẢN THƯỜNG — 46 MB**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-1.0.1.msi)
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/word.png" width="430" alt="Tra cụm give up"><br><sub>Gõ <code>give up</code>: nghĩa của cả cụm hiện lên trước, kèm ví dụ</sub></td>
+    <td align="center"><img src="docs/screenshots/sentence.png" width="430" alt="Dịch câu"><br><sub>Dịch cả câu, bên dưới là chú giải từng cụm, bấm ô để đổi nghĩa</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/reverse.png" width="430" alt="Tra ngược Việt sang Anh"><br><sub>Việt → Anh: gõ không dấu <code>cham soc</code> vẫn ra đúng</sub></td>
+    <td align="center"><img src="docs/screenshots/suggest.png" width="430" alt="Gợi ý chính tả"><br><sub>Gõ sai chính tả thì có dòng "Ý bạn là", bấm vào là tra luôn</sub></td>
+  </tr>
+</table>
 
-Tra từ và dịch câu bằng từ điển và luật ngữ pháp. Nhẹ, mở nhanh.
-**Hầu hết mọi người nên tải bản này.**
+![Cài đặt](docs/screenshots/h-install.png)
 
-### [**▶ TẢI BẢN AI — 185 MB**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-AI-1.0.1.msi)
+1. Bấm đúp file `.msi` vừa tải. Không cần cài Java, **không cần quyền quản trị**.
+2. Nếu Windows hiện bảng xanh **"Windows protected your PC"**: bấm **More info**, rồi **Run anyway**.
+   Bảng này hiện vì bộ cài chưa có chữ ký số trả phí, không phải vì phát hiện virus.
+3. Bấm **Next** vài lần là xong. Mở bằng shortcut ngoài Desktop hoặc gõ *DictPocket* vào ô tìm kiếm của Windows.
 
-Có thêm bộ dịch máy chạy ngay trên máy bạn, dịch câu dài và câu khó mượt hơn hẳn.
-Nặng hơn, mỗi câu dịch lâu hơn khoảng nửa giây.
+Gỡ cài đặt: **Settings → Apps → Installed apps → DictPocket → Uninstall**.
 
-Cài được **cả hai cùng lúc** để so sánh — tên và màu icon khác nhau.
+![Cách dùng](docs/screenshots/h-usage.png)
 
-> ### ⚠ Đừng bấm nút `Code` màu xanh ở đầu trang
-> Nút đó tải mã nguồn cho lập trình viên, **không có phần mềm bên trong**. Ở trang
-> Releases cũng vậy: hai dòng `Source code (zip)` và `Source code (tar.gz)` là do GitHub
-> tự thêm vào, bỏ qua chúng. Chỉ hai nút xanh ở trên mới là phần mềm.
+Bấm nút trên cùng để đổi chế độ, gõ vào ô rồi bấm Enter.
 
-Không muốn cài đặt gì cả? Có
-[**bản chạy thẳng (45 MB)**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-1.0.1-windows.zip)
-— giải nén ra, bấm `TuDienOffline.exe` là dùng được. Xoá thư mục đi là sạch, không để lại gì.
-
----
-
-## Phần mềm trông như thế nào
-
-<img src="anh-chup/tra-tu.png" width="600" alt="Tra từ give up">
-
-*Gõ `give up` — nghĩa của cả cụm hiện lên trước, kèm ví dụ.*
-
-<img src="anh-chup/dich-cau.png" width="600" alt="Dịch cả câu">
-
-*Dán cả câu vào. Bên dưới câu dịch là chú giải từng cụm, bấm vào ô để đổi nghĩa khác.*
-
----
-
-## Cài đặt
-
-**1.** Bấm đúp vào file `.msi` vừa tải.
-
-**2.** Trình duyệt có thể hỏi *"file này không an toàn"* → bấm **Giữ lại** / **Keep**.
-Chuyện này xảy ra với mọi file cài đặt tải từ Internet.
-
-**3.** Windows hiện bảng xanh **"Windows protected your PC"** → bấm dòng chữ nhỏ
-**More info**, rồi bấm nút **Run anyway**.
-
-Bảng đó hiện ra vì bộ cài chưa mua chữ ký số (khoảng 300 USD mỗi năm), **không phải vì
-máy phát hiện virus**. Muốn tự kiểm tra cho yên tâm thì xem mục
-[Kiểm tra file tải về](#kiểm-tra-file-tải-về).
-
-**4.** Bấm **Next** vài lần là xong.
-
-- Không cần cài Java hay bất cứ phần mềm nào khác.
-- **Không cần quyền quản trị máy** — cài được trên máy trường, máy công ty.
-
-**5.** Mở phần mềm bằng shortcut ngoài Desktop, hoặc gõ *tudien* vào ô tìm kiếm của Windows.
-
-Muốn gỡ: **Settings → Apps → Installed apps**, tìm `TuDienOffline`, bấm **Uninstall**.
-Gỡ sạch, không để lại gì.
-
----
-
-## Hướng dẫn dùng
-
-Có ba chế độ, bấm nút trên cùng để đổi.
-
-### 1. Tra từ (Anh → Việt)
-
-Gõ một từ hoặc một cụm rồi bấm Enter.
-
-- Gõ cả cụm như `give up`, `look after`: nghĩa của **cụm** hiện lên trước, không phải ngồi
-  mò giữa một mục từ dài mấy chục nghĩa.
-- Gõ sai chính tả vẫn ra: gõ `aboout` nó hiểu là `about`.
-
-### 2. Dịch câu (Anh → Việt)
-
-Dán cả câu vào rồi Enter.
-
-Dưới câu dịch có phần **chú giải từng cụm** — mỗi ô là một từ kèm nghĩa đã được chọn.
-Ô nào có dấu `▾` là từ đó còn nghĩa khác; bấm vào ô để xem và chọn nghĩa hợp hơn.
-
-Đây là chỗ hữu ích nhất khi gặp câu dài mà không chắc mình hiểu đúng.
-
-### 3. Việt → Anh
-
-<img src="anh-chup/viet-anh.png" width="600" alt="Tra ngược Việt sang Anh">
-
-Gõ tiếng Việt, ra danh sách từ tiếng Anh tương ứng, xếp theo mức sát nghĩa.
-**Gõ không dấu cũng được**: `cham soc` ra đúng kết quả như `chăm sóc`.
-
-### Phím tắt
-
-| Phím | Việc |
+| Chế độ | Làm gì |
 |---|---|
-| `Ctrl` + `1` / `2` / `3` | đổi giữa ba chế độ |
-| `Ctrl` + `L` | nhảy về ô nhập, bôi đen sẵn để gõ đè |
-| `Enter` | tra |
+| **Tra từ** | Gõ một từ hoặc cụm như `give up`: nghĩa của cả cụm hiện lên trước. Gõ sai chính tả vẫn ra (`aboout` → `about`). |
+| **Dịch câu** | Dán cả câu. Dưới bản dịch là chú giải từng cụm; ô nào có `▾` thì bấm vào để chọn nghĩa khác. |
+| **Việt → Anh** | Gõ tiếng Việt ra danh sách từ tiếng Anh. Gõ không dấu cũng được. |
 
-### Nút "Nguồn từ điển"
+Phím tắt: `Ctrl`+`1` / `2` / `3` đổi chế độ, `Ctrl`+`L` về ô nhập.
+Nút **Nguồn từ điển** để bật/tắt từng bộ từ điển và đổi thứ tự ưu tiên. Ví dụ đọc tài liệu kỹ thuật thì kéo
+"Thuật ngữ CNTT" lên trên: `platform` ra *nền tảng* thay vì *sân ga*.
 
-Phần mềm có sẵn ba bộ từ điển: bộ chung hơn 108.000 mục, bảng thuật ngữ công nghệ thông
-tin, và bảng thuật ngữ y tế. Nút này cho **bật/tắt** từng bộ và **đổi thứ tự ưu tiên** —
-bộ nào xếp trên thì nghĩa của nó được dùng trước.
+![Nên biết](docs/screenshots/h-notes.png)
 
-Ví dụ đang đọc tài liệu kỹ thuật thì kéo bảng thuật ngữ CNTT lên trên: `platform` sẽ ra
-*"nền tảng"* thay vì *"sân ga"*. Đổi xong có tác dụng ngay, không phải khởi động lại.
+- **Dịch câu không hoàn hảo.** Bản thường dễ sai ở câu bị động hay câu có mệnh đề quan hệ. Hãy coi đó là thứ
+  giúp bạn hiểu câu gốc và đối chiếu phần chú giải từng cụm bên dưới. Bản AI khá hơn nhưng vẫn có thể sai.
+- Không có phát âm (chỉ có phiên âm IPA). Không dịch cả câu từ Việt sang Anh, chỉ tra từ và cụm.
 
----
+![Hỏi nhanh](docs/screenshots/h-faq.png)
 
-## Nên biết trước khi dùng
+**Có cần mạng không?** Không, kể cả lần chạy đầu. Phần mềm không có mã nào mở kết nối mạng, bản AI cũng vậy.
 
-**Dịch câu không hoàn hảo.** Bản thường dịch sai câu bị động có mệnh đề quan hệ. Ví dụ
-`restricts what each user is allowed to do` ra *"giới hạn gì mỗi người dùng là cho phép
-để cho đến"* — đọc không hiểu gì. Câu kiểu đó cần bản AI.
+**Nên chọn bản nào?** Bản thường, trừ khi hay đọc câu tiếng Anh dài và phức tạp. Cài được cả hai cùng lúc để so.
 
-Hãy coi phần dịch câu là **thứ giúp bạn hiểu câu gốc**, không phải bản dịch hoàn chỉnh để
-nộp đi. Phần chú giải từng cụm bên dưới mới là chỗ đáng tin nhất.
+**Đang dùng bản cũ tên "Từ điển offline" (TuDienOffline)?** DictPocket là ứng dụng riêng nên bản cũ vẫn còn:
+gỡ nó trong **Settings → Apps**. Không mất dữ liệu gì.
 
-**Không có phát âm.** Có phiên âm IPA dạng chữ, không có loa đọc.
+**Máy yếu chạy được không?** Được: khoảng 150 MB RAM, mở lên chưa đến 2 giây.
 
-**Không dịch được cả câu từ Việt sang Anh.** Chiều đó chỉ tra từ và cụm. Cố làm sẽ ra câu
-sai mà người dùng không có cách nào biết.
+![Giấy phép](docs/screenshots/h-license.png)
 
----
-
-## Kiểm tra file tải về
-
-Muốn chắc file tải về đúng là file gốc, chưa bị ai sửa dọc đường: mở **PowerShell** tại
-thư mục chứa file rồi gõ
-
-```powershell
-Get-FileHash .\TuDienOffline-1.0.1.msi -Algorithm SHA256
-```
-
-So chuỗi ký tự nhận được với file `SHA256SUMS.txt` ở
-[trang tải](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest).
-Giống nhau nghĩa là file đúng.
-
----
-
-## Hỏi đáp
-
-**Có cần mạng không?** Không, kể cả lần chạy đầu tiên. Rút mạng ra vẫn dùng bình thường.
-
-**Có gửi dữ liệu của tôi đi đâu không?** Không. Phần mềm không có một dòng mã nào mở kết
-nối mạng.
-
-**Máy yếu chạy được không?** Được. Tốn khoảng 150 MB RAM, mở lên mất chưa đến 2 giây.
-
-**Máy không có quyền admin thì sao?** Vẫn cài được bình thường. Phần mềm cài vào thư mục
-riêng của tài khoản bạn, không đụng vào hệ thống.
-
-**Nên chọn bản nào?** Bản thường, trừ khi bạn hay phải đọc câu tiếng Anh dài và phức tạp.
-Không chắc thì cài cả hai rồi so.
-
-**Bản AI có gửi câu lên mạng không?** Không. Bộ dịch máy nằm luôn trong thư mục cài và
-chạy trên máy bạn.
-
-**Có bản cho macOS / Linux / điện thoại không?** Chưa có, hiện chỉ có Windows.
-
----
-
-## Giấy phép
-
-Phần mềm miễn phí, dùng cho mục đích cá nhân và học tập.
-
-Bộ dịch máy dùng mô hình [opus-mt-en-vi](https://huggingface.co/Xenova/opus-mt-en-vi)
-của Helsinki-NLP, giấy phép Apache-2.0.
-
-Bộ từ điển chung lấy từ một tập dữ liệu Anh–Việt lưu hành trên mạng mà **chưa xác minh
-được giấy phép**. Nếu bạn là người giữ bản quyền tập dữ liệu đó, mở một
-[issue](https://github.com/AnhTuan2111/offline-translate-vi-en/issues) là sẽ được gỡ xuống.
-
----
-
-*Lập trình viên muốn tự dựng từ mã nguồn: xem [PHAT-TRIEN.md](PHAT-TRIEN.md).*
+Miễn phí, dùng cho mục đích cá nhân và học tập. Bộ dịch máy dùng mô hình
+[opus-mt-en-vi](https://huggingface.co/Xenova/opus-mt-en-vi) (Helsinki-NLP, Apache-2.0).
+Bộ từ điển chung lấy từ một tập dữ liệu Anh–Việt lưu hành trên mạng mà **chưa xác minh được giấy phép**;
+nếu bạn giữ bản quyền, mở một [issue](https://github.com/AnhTuan2111/offline-translate-vi-en/issues) là sẽ được gỡ.
