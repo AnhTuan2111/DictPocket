@@ -29,3 +29,6 @@ Thumbs.db
 # WiX portable tai ve de lam bo cai .msi (41 MB), sinh lai duoc
 /tools/
 
+
+# Sinh boi maven-shade-plugin, doi theo so phien ban trong pom nen gay nhieu moi lan phat hanh
+dict-importer/dependency-reduced-pom.xml
