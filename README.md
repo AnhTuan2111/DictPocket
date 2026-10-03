@@ -1,204 +1,186 @@
-<img src="app-desktop/src/main/resources/icon/app-256.png" width="96" align="right" alt="">
+<img src="app-desktop/src/main/resources/icon/app-256.png" width="110" align="right" alt="">
 
 # Từ điển & dịch offline Anh–Việt
 
-Ứng dụng desktop tra từ và dịch câu Anh–Việt **chạy hoàn toàn offline**. Không có server,
-không có tài khoản, không một dòng mã nào mở kết nối mạng.
+Tra từ và dịch câu tiếng Anh **không cần mạng**. Không tài khoản, không quảng cáo,
+không gửi gì ra ngoài. Dành cho Windows 10/11.
 
-| | |
+<br clear="right">
+
+## ⬇ Tải về
+
+### [**▶ TẢI BẢN THƯỜNG — 46 MB**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-1.0.1.msi)
+
+Tra từ và dịch câu bằng từ điển và luật ngữ pháp. Nhẹ, mở nhanh.
+**Hầu hết mọi người nên tải bản này.**
+
+### [**▶ TẢI BẢN AI — 185 MB**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-AI-1.0.1.msi)
+
+Có thêm bộ dịch máy chạy ngay trên máy bạn, dịch câu dài và câu khó mượt hơn hẳn.
+Nặng hơn, mỗi câu dịch lâu hơn khoảng nửa giây.
+
+Cài được **cả hai cùng lúc** để so sánh — tên và màu icon khác nhau.
+
+> ### ⚠ Đừng bấm nút `Code` màu xanh ở đầu trang
+> Nút đó tải mã nguồn cho lập trình viên, **không có phần mềm bên trong**. Ở trang
+> Releases cũng vậy: hai dòng `Source code (zip)` và `Source code (tar.gz)` là do GitHub
+> tự thêm vào, bỏ qua chúng. Chỉ hai nút xanh ở trên mới là phần mềm.
+
+Không muốn cài đặt gì cả? Có
+[**bản chạy thẳng (45 MB)**](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest/download/TuDienOffline-1.0.1-windows.zip)
+— giải nén ra, bấm `TuDienOffline.exe` là dùng được. Xoá thư mục đi là sạch, không để lại gì.
+
+---
+
+## Phần mềm trông như thế nào
+
+<img src="anh-chup/tra-tu.png" width="600" alt="Tra từ give up">
+
+*Gõ `give up` — nghĩa của cả cụm hiện lên trước, kèm ví dụ.*
+
+<img src="anh-chup/dich-cau.png" width="600" alt="Dịch cả câu">
+
+*Dán cả câu vào. Bên dưới câu dịch là chú giải từng cụm, bấm vào ô để đổi nghĩa khác.*
+
+---
+
+## Cài đặt
+
+**1.** Bấm đúp vào file `.msi` vừa tải.
+
+**2.** Trình duyệt có thể hỏi *"file này không an toàn"* → bấm **Giữ lại** / **Keep**.
+Chuyện này xảy ra với mọi file cài đặt tải từ Internet.
+
+**3.** Windows hiện bảng xanh **"Windows protected your PC"** → bấm dòng chữ nhỏ
+**More info**, rồi bấm nút **Run anyway**.
+
+Bảng đó hiện ra vì bộ cài chưa mua chữ ký số (khoảng 300 USD mỗi năm), **không phải vì
+máy phát hiện virus**. Muốn tự kiểm tra cho yên tâm thì xem mục
+[Kiểm tra file tải về](#kiểm-tra-file-tải-về).
+
+**4.** Bấm **Next** vài lần là xong.
+
+- Không cần cài Java hay bất cứ phần mềm nào khác.
+- **Không cần quyền quản trị máy** — cài được trên máy trường, máy công ty.
+
+**5.** Mở phần mềm bằng shortcut ngoài Desktop, hoặc gõ *tudien* vào ô tìm kiếm của Windows.
+
+Muốn gỡ: **Settings → Apps → Installed apps**, tìm `TuDienOffline`, bấm **Uninstall**.
+Gỡ sạch, không để lại gì.
+
+---
+
+## Hướng dẫn dùng
+
+Có ba chế độ, bấm nút trên cùng để đổi.
+
+### 1. Tra từ (Anh → Việt)
+
+Gõ một từ hoặc một cụm rồi bấm Enter.
+
+- Gõ cả cụm như `give up`, `look after`: nghĩa của **cụm** hiện lên trước, không phải ngồi
+  mò giữa một mục từ dài mấy chục nghĩa.
+- Gõ sai chính tả vẫn ra: gõ `aboout` nó hiểu là `about`.
+
+### 2. Dịch câu (Anh → Việt)
+
+Dán cả câu vào rồi Enter.
+
+Dưới câu dịch có phần **chú giải từng cụm** — mỗi ô là một từ kèm nghĩa đã được chọn.
+Ô nào có dấu `▾` là từ đó còn nghĩa khác; bấm vào ô để xem và chọn nghĩa hợp hơn.
+
+Đây là chỗ hữu ích nhất khi gặp câu dài mà không chắc mình hiểu đúng.
+
+### 3. Việt → Anh
+
+<img src="anh-chup/viet-anh.png" width="600" alt="Tra ngược Việt sang Anh">
+
+Gõ tiếng Việt, ra danh sách từ tiếng Anh tương ứng, xếp theo mức sát nghĩa.
+**Gõ không dấu cũng được**: `cham soc` ra đúng kết quả như `chăm sóc`.
+
+### Phím tắt
+
+| Phím | Việc |
 |---|---|
-| Mục từ | **109.356** từ 3 nguồn (từ điển 109K + 2 bảng thuật ngữ tự soạn) |
-| Tra một từ | **13,7 µs** |
-| Dịch một câu 24 từ | **6 ms** |
-| RAM lúc chạy | 132–170 MB |
-| Yêu cầu | Windows 10/11 64-bit. **Không cần cài Java.** |
+| `Ctrl` + `1` / `2` / `3` | đổi giữa ba chế độ |
+| `Ctrl` + `L` | nhảy về ô nhập, bôi đen sẵn để gõ đè |
+| `Enter` | tra |
+
+### Nút "Nguồn từ điển"
+
+Phần mềm có sẵn ba bộ từ điển: bộ chung hơn 108.000 mục, bảng thuật ngữ công nghệ thông
+tin, và bảng thuật ngữ y tế. Nút này cho **bật/tắt** từng bộ và **đổi thứ tự ưu tiên** —
+bộ nào xếp trên thì nghĩa của nó được dùng trước.
+
+Ví dụ đang đọc tài liệu kỹ thuật thì kéo bảng thuật ngữ CNTT lên trên: `platform` sẽ ra
+*"nền tảng"* thay vì *"sân ga"*. Đổi xong có tác dụng ngay, không phải khởi động lại.
 
 ---
 
-## 1. Tải và cài
+## Nên biết trước khi dùng
 
-Có **hai bản**, cùng một mã nguồn, khác nhau đúng một chỗ: bản AI có mang theo mô hình
-dịch máy nơ-ron.
+**Dịch câu không hoàn hảo.** Bản thường dịch sai câu bị động có mệnh đề quan hệ. Ví dụ
+`restricts what each user is allowed to do` ra *"giới hạn gì mỗi người dùng là cho phép
+để cho đến"* — đọc không hiểu gì. Câu kiểu đó cần bản AI.
 
-| Bản | Dịch câu bằng | Kích thước | Nên dùng khi |
-|---|---|---|---|
-| `TuDienOffline-1.0.1.msi` | Từ điển + luật ngữ pháp. **Không có mô hình AI nào.** | ~46 MB | Tra từ, dịch câu ngắn, máy yếu |
-| `TuDienOffline-AI-1.0.1.msi` | Thêm mô hình nơ-ron chạy cục bộ | ~185 MB | Cần dịch câu dài, câu bị động, mệnh đề quan hệ |
+Hãy coi phần dịch câu là **thứ giúp bạn hiểu câu gốc**, không phải bản dịch hoàn chỉnh để
+nộp đi. Phần chú giải từng cụm bên dưới mới là chỗ đáng tin nhất.
 
-Tải ở mục [Releases](https://github.com/AnhTuan2111/offline-translate-vi-en/releases).
-Cài vào `%LOCALAPPDATA%`, **không cần quyền administrator**.
-Cài được **cả hai song song** — tên ứng dụng khác nhau, icon khác màu.
+**Không có phát âm.** Có phiên âm IPA dạng chữ, không có loa đọc.
 
-### Các bước
+**Không dịch được cả câu từ Việt sang Anh.** Chiều đó chỉ tra từ và cụm. Cố làm sẽ ra câu
+sai mà người dùng không có cách nào biết.
 
-1. Tải file `.msi` rồi bấm đúp.
-2. **Windows sẽ hiện cảnh báo SmartScreen** — bộ cài này *chưa ký số*. Bấm
-   **More info** → **Run anyway**. Muốn yên tâm thì đối chiếu mã băm trước khi cài:
+---
 
-   ```powershell
-   Get-FileHash .\TuDienOffline-1.0.1.msi -Algorithm SHA256
-   ```
+## Kiểm tra file tải về
 
-   So với `SHA256SUMS.txt` đi kèm bản phát hành. Khớp nghĩa là file bạn tải đúng là file
-   đã được dựng ra, không bị sửa dọc đường.
-3. Trình cài đặt cho chọn thư mục, tự tạo shortcut ở Start Menu và ngoài Desktop.
-4. Gỡ cài đặt bằng **Settings → Apps** như mọi ứng dụng Windows khác.
-
-### Không muốn cài đặt
-
-Bản `.zip` giải nén ra chạy ngay, không đụng vào registry, xoá thư mục là sạch:
+Muốn chắc file tải về đúng là file gốc, chưa bị ai sửa dọc đường: mở **PowerShell** tại
+thư mục chứa file rồi gõ
 
 ```powershell
-Expand-Archive TuDienOffline-1.0.1-windows.zip -DestinationPath D:\TuDien
-D:\TuDien\TuDienOffline\TuDienOffline.exe
+Get-FileHash .\TuDienOffline-1.0.1.msi -Algorithm SHA256
 ```
+
+So chuỗi ký tự nhận được với file `SHA256SUMS.txt` ở
+[trang tải](https://github.com/AnhTuan2111/offline-translate-vi-en/releases/latest).
+Giống nhau nghĩa là file đúng.
 
 ---
 
-## 2. Dùng
+## Hỏi đáp
 
-Ba chế độ, đổi bằng nút trên thanh công cụ hoặc phím tắt:
+**Có cần mạng không?** Không, kể cả lần chạy đầu tiên. Rút mạng ra vẫn dùng bình thường.
 
-| Phím tắt | Chế độ | Ví dụ |
-|---|---|---|
-| `Ctrl+1` | Tra từ Anh→Việt | `give up` → thẻ cụm động từ hiện trước mục từ `give` |
-| `Ctrl+2` | Dịch cả câu Anh→Việt | kèm chú giải từng cụm bên dưới để đối chiếu |
-| `Ctrl+3` | Tra ngược Việt→Anh | gõ `cham soc` **không dấu** vẫn ra `tend, care, attend` |
-| `Ctrl+L` | Về ô nhập | |
+**Có gửi dữ liệu của tôi đi đâu không?** Không. Phần mềm không có một dòng mã nào mở kết
+nối mạng.
 
-Gõ sai chính tả vẫn ra: `aboout` → `about`, `cham sok` → gợi ý `chăm sóc`.
+**Máy yếu chạy được không?** Được. Tốn khoảng 150 MB RAM, mở lên mất chưa đến 2 giây.
 
-Ở bản AI, ô **"dùng mô hình AI trên máy"** xuất hiện trong chế độ dịch câu. Bản thường
-không có ô đó vì không có mô hình nào để bật.
+**Máy không có quyền admin thì sao?** Vẫn cài được bình thường. Phần mềm cài vào thư mục
+riêng của tài khoản bạn, không đụng vào hệ thống.
 
-### Thêm từ điển của riêng bạn
+**Nên chọn bản nào?** Bản thường, trừ khi bạn hay phải đọc câu tiếng Anh dài và phức tạp.
+Không chắc thì cài cả hai rồi so.
 
-Định dạng TSV, mỗi dòng một mục, phân cách bằng **Tab**:
+**Bản AI có gửi câu lên mạng không?** Không. Bộ dịch máy nằm luôn trong thư mục cài và
+chạy trên máy bạn.
 
-```
-từ tiếng Anh	nghĩa tiếng Việt	từ loại
-use case	ca sử dụng	danh từ
-race condition	lỗi tranh chấp do thứ tự thực thi	danh từ
-```
-
-Dòng bắt đầu bằng `#` là chú thích. Cột từ loại có thể bỏ trống.
-Dựng lại dữ liệu với nguồn mới (xem §3), nguồn truyền thêm ở dòng lệnh **luôn được ưu tiên
-hơn** từ điển nền. Trong app, nút **Nguồn từ điển** cho bật/tắt và đổi thứ tự ngay, không phải
-dựng lại.
+**Có bản cho macOS / Linux / điện thoại không?** Chưa có, hiện chỉ có Windows.
 
 ---
 
-## 3. Chạy từ mã nguồn
+## Giấy phép
 
-Cần **JDK 25** và **Maven 3.9+**.
+Phần mềm miễn phí, dùng cho mục đích cá nhân và học tập.
 
-```powershell
-git clone https://github.com/AnhTuan2111/offline-translate-vi-en.git
-cd offline-translate-vi-en
-.\scripts\run.ps1 -Rebuild
-```
+Bộ dịch máy dùng mô hình [opus-mt-en-vi](https://huggingface.co/Xenova/opus-mt-en-vi)
+của Helsinki-NLP, giấy phép Apache-2.0.
 
-`-Rebuild` sinh `data\build\` từ `anhviet109K.txt` (~7 giây). Những lần sau chạy
-`.\scripts\run.ps1` là đủ.
-
-| Lệnh | Việc |
-|---|---|
-| `.\scripts\run.ps1 -Query "give up"` | mở sẵn một truy vấn |
-| `.\scripts\run.ps1 -Nmt` | bật sẵn ô dùng mô hình AI |
-| `.\scripts\tai-model-nmt.ps1` | tải mô hình nơ-ron (~98 MB) |
-| `.\scripts\hoc-bang-xac-suat.ps1` | học lại bảng xác suất dịch từ |
-| `mvn test` | 117 test |
-| `java -jar dict-importer\target\dict-importer.jar verify data\build` | 38 mục nghiệm thu dữ liệu |
-
-Dựng lại dữ liệu bằng tay, kèm bảng thuật ngữ:
-
-```powershell
-java -jar dict-importer\target\dict-importer.jar build `
-     anhviet109K.txt data\build data\thuat-ngu-cntt.tsv data\thuat-ngu-y-te.tsv
-```
-
-### Nhánh
-
-| Nhánh | Dùng để |
-|---|---|
-| `main` | chỉ chứa những gì đã phát hành. Mỗi bản phát hành là một thẻ `vX.Y.Z` trên nhánh này. |
-| `develop` | nơi làm việc hằng ngày. Gộp vào `main` khi chuẩn bị phát hành. |
-
-Phát hành xong, `phat-hanh.ps1` tự đẩy số phiên bản trong pom lên `X.Y.(Z+1)-SNAPSHOT` để
-lần sau làm tiếp không giẫm vào bản đã phát hành. Nhớ gộp `main` ngược lại `develop` sau đó:
-
-```powershell
-git switch develop
-git merge main
-```
-
-### Tự đóng gói
-
-```powershell
-.\scripts\dong-goi.ps1                          # thư mục chạy ngay, không cần cài
-.\scripts\dong-goi.ps1 -Type msi                # bộ cài .msi
-.\scripts\dong-goi.ps1 -Type msi -WithNmt       # bộ cài kèm mô hình AI
-.\scripts\phat-hanh.ps1 -Version 1.0.1          # cả hai bản + SHA256 + gắn thẻ git
-```
-
-`.msi` cần **WiX Toolset 3.x**. Không phải cài vào máy: tải bản portable
-[`wix314-binaries.zip`](https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip)
-giải nén vào `tools\wix`, script tự thêm vào PATH.
-
-Icon sinh bằng `python scripts\tao-icon.py` (cần Pillow) — chỉ chạy lại khi muốn đổi thiết
-kế, file `.ico` đã commit sẵn.
+Bộ từ điển chung lấy từ một tập dữ liệu Anh–Việt lưu hành trên mạng mà **chưa xác minh
+được giấy phép**. Nếu bạn là người giữ bản quyền tập dữ liệu đó, mở một
+[issue](https://github.com/AnhTuan2111/offline-translate-vi-en/issues) là sẽ được gỡ xuống.
 
 ---
 
-## 4. Chuyện offline và chuyện AI
-
-Nói rõ để không ai hiểu nhầm:
-
-- **Bản thường không có mô hình AI nào.** Dịch câu bằng từ điển + bảng xác suất
-  (IBM Model 1, học từ kho câu song ngữ) + luật ngữ pháp viết tay. Toàn bộ là bảng tra và
-  câu lệnh `if`, xem được từng bước trong phần chú giải.
-- **Bản AI có một mô hình nơ-ron thật** chạy trên máy bạn — `opus-mt-en-vi` đã xuất sang
-  ONNX, 6 lớp encoder + 6 lớp decoder. Nó chạy offline, nhưng nó vẫn là AI.
-- Cả hai bản đều **không mở kết nối mạng**. Mô hình tải về một lần bằng script riêng,
-  lúc chạy app thì không có gì đi ra ngoài.
-
-**Giới hạn đã biết của bản thường:** câu bị động kèm mệnh đề quan hệ thì dịch sai hẳn —
-`restricts what each user is allowed to do` ra "giới hạn gì mỗi người dùng là cho phép để
-cho đến". Đây là trần của hướng dịch bằng luật, thêm từ điển không cứu được. Loại câu đó
-cần bản AI.
-
----
-
-## 5. Cấu trúc
-
-| Module | Phụ thuộc lúc chạy | Việc |
-|---|---|---|
-| `dict-core` | **không có gì ngoài JDK** | định dạng `dict.pack`, index BM25, tra cứu, dịch bằng luật |
-| `dict-importer` | `dict-core` | đọc nguồn từ điển, dựng `.pack` + index, nghiệm thu dữ liệu |
-| `nmt-engine` | ONNX Runtime | dịch máy nơ-ron, **tuỳ chọn** — thiếu jar thì app vẫn chạy |
-| `app-desktop` | JavaFX | giao diện |
-
-Không dùng Spring Boot: ứng dụng desktop một tiến trình không cần container DI, và
-thời gian khởi động thì cần. Composition root viết tay nằm ở `AppContext`.
-
-Từ điển nằm trong một file nhị phân bất biến, đọc bằng `mmap` qua `java.lang.foreign.Arena`
-nên đóng là nhả file ngay — trên Windows điều đó quan trọng. Chi tiết định dạng và thuật
-toán ở `docs/PLAN.md`.
-
----
-
-## 6. Nguồn dữ liệu và giấy phép
-
-| Thành phần | Nguồn | Giấy phép |
-|---|---|---|
-| Mô hình nơ-ron | [Xenova/opus-mt-en-vi](https://huggingface.co/Xenova/opus-mt-en-vi) (Helsinki-NLP) | Apache-2.0 |
-| `anhviet109K.txt` | bộ từ điển Anh–Việt lưu hành trên mạng | **không rõ** |
-| Bảng thuật ngữ trong `data/` | tự soạn | theo mã nguồn |
-
-Xuất xứ và giấy phép của `anhviet109K.txt` **chưa xác minh được**. Bản dựng sẵn ở mục
-Releases phát hành cho mục đích cá nhân và học tập; nếu người giữ bản quyền dữ liệu có ý
-kiến thì sẽ gỡ xuống ngay.
-
-Dùng vào việc khác thì nên thay bằng nguồn có giấy phép rõ ràng, ví dụ FreeDict `eng-vie`
-(GPL). Cổng `DictParser` đã chừa sẵn cho việc đó: thêm một nguồn chỉ là viết thêm một class,
-không đụng vào `dict-core`.
+*Lập trình viên muốn tự dựng từ mã nguồn: xem [PHAT-TRIEN.md](PHAT-TRIEN.md).*
