@@ -5,50 +5,49 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tim thu muc du lieu (dict.pack + cac file .idx).
- *
- * <p>Thu tu tim, dung ngay khi thay dict.pack:
- * <ol>
- *   <li>{@code -Ddict.data=<duong dan>} - de chay tu IDE hoac chi ra du lieu khac</li>
- *   <li>{@code <thu muc cai dat>/app/data} - khi chay ban da jpackage</li>
- *   <li>{@code ./data/build} va {@code ../data/build} - khi chay tu trong ma nguon</li>
- *   <li>{@code ~/.offline-dict/data} - noi nguoi dung tu dat them tu dien (F5)</li>
- * </ol>
- *
- * <p>Du lieu DI KEM ban cai phai duoc xet TRUOC hai duong dan tuong doi, vi hai duong dan do
- * tinh theo THU MUC HIEN HANH chu khong theo cho dat ung dung. Luc dau xep nguoc lai va da
- * do that: mo ban portable tu mot cua so dong lenh dang dung o thu muc ma nguon thi no doc
- * du lieu cua ma nguon, khong doc du lieu minh mang theo - ma thanh trang thai van bao la
- * chay binh thuong. Dung tren may nguoi dung vi ho khong co thu muc do, nhung day van la
- * mot ung dung doc nham du lieu ma khong he keu len mot tieng.
- */
-public final class DataLocator {
-
+// Tìm thư mục dữ liệu (dict.pack cùng các file .idx), dừng ngay khi thấy dict.pack.
+// Thứ tự: -Ddict.data, thư mục app/data cạnh bản cài, data/build khi chạy từ mã nguồn,
+// rồi ~/.offline-dict/data của người dùng.
+// Dữ liệu đi kèm bản cài phải xét TRƯỚC hai đường dẫn tương đối, vì chúng tính theo thư mục hiện hành
+// chứ không theo chỗ đặt ứng dụng: mở bản portable từ một cửa sổ lệnh đang đứng trong thư mục mã
+// nguồn sẽ đọc nhầm dữ liệu của mã nguồn mà không báo lỗi.
+public final class DataLocator
+{
     public static final String PACK_FILE = "dict.pack";
     private static final String PROPERTY = "dict.data";
 
-    private DataLocator() {}
+    private DataLocator()
+    {
+    }
 
-    public static Path locate() {
+    public static Path locate()
+    {
         List<Path> tried = new ArrayList<>(6);
-        for (Path p : candidates()) {
+        for (Path p : candidates())
+        {
             tried.add(p);
-            if (p != null && Files.isRegularFile(p.resolve(PACK_FILE))) return p;
+            if (p != null && Files.isRegularFile(p.resolve(PACK_FILE)))
+            {
+                return p;
+            }
         }
         throw new IllegalStateException("""
-                Khong tim thay %s.
-                Da thu: %s
-                Chay lenh nay de sinh du lieu:
+                Cannot find %s.
+                Tried: %s
+                Build the data first:
                   java -cp "dict-core/target/classes;dict-importer/target/classes" \\
                        com.anhtuan.dict.importer.cli.ImporterMain build anhviet109K.txt data/build
                 """.formatted(PACK_FILE, tried));
     }
 
-    private static List<Path> candidates() {
+    private static List<Path> candidates()
+    {
         List<Path> out = new ArrayList<>(6);
-        String prop = System.getProperty(PROPERTY);
-        if (prop != null && !prop.isBlank()) out.add(Path.of(prop));
+        String property = System.getProperty(PROPERTY);
+        if (property != null && !property.isBlank())
+        {
+            out.add(Path.of(property));
+        }
         out.add(appDir().resolve("data"));
         out.add(Path.of("data", "build"));
         out.add(Path.of("..", "data", "build"));
@@ -56,13 +55,16 @@ public final class DataLocator {
         return out;
     }
 
-    /** Thu muc chua file jar/class dang chay - de ban jpackage tim duoc du lieu ben canh no. */
-    private static Path appDir() {
-        try {
-            Path self = Path.of(DataLocator.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI());
+    // Thư mục chứa jar / class đang chạy, để bản jpackage tìm thấy dữ liệu nằm cạnh nó
+    private static Path appDir()
+    {
+        try
+        {
+            Path self = Path.of(DataLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             return Files.isDirectory(self) ? self : self.getParent();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return Path.of(".");
         }
     }

@@ -6,40 +6,22 @@ import com.anhtuan.dict.core.lexicon.LexicalPrior;
 import com.anhtuan.dict.core.lexicon.LexiconFormat;
 import com.anhtuan.dict.core.nlp.ViCompounds;
 import com.anhtuan.dict.core.pack.PackReader;
-import com.anhtuan.dict.core.source.SourceCatalog;
 import com.anhtuan.dict.core.service.DictionaryGlossEngine;
 import com.anhtuan.dict.core.service.LookupService;
 import com.anhtuan.dict.core.service.ReverseSearchService;
 import com.anhtuan.dict.core.service.RuleBasedTranslationEngine;
+import com.anhtuan.dict.core.source.SourceCatalog;
 import com.anhtuan.dict.core.spi.TranslationEngine;
 
 import java.nio.file.Path;
 import java.util.Set;
 
-/**
- * COMPOSITION ROOT - toan bo viec "lap rap" cua ung dung nam trong mot cho duy nhat.
- *
- * <h2>Vi sao khong dung Spring Boot (sua lai AD-8 cua PLAN.md)</h2>
- * Ke hoach ban dau dinh dung Spring Boot non-web lam DI. Do that thi gia phai tra:
- * <ul>
- *   <li>~10 MB jar (spring-core / context / beans / aop / expression, boot,
- *       autoconfigure, logback, snakeyaml) cho dung mot viec la goi {@code new} 6 lan;</li>
- *   <li>them 0,5-1,5 giay khoi dong cho classpath scanning va context refresh - ma voi
- *       app tra tu thi do tre khoi dong chinh la thu nguoi dung cam nhan dau tien;</li>
- *   <li>DI bang reflection lam kho jlink/jpackage - dung cai rui ro "ket o M8" ma
- *       PLAN.md muc 12 da ghi.</li>
- * </ul>
- * Doi lai duoc gi: voi 6 bean va khong he co transaction, web layer hay profile,
- * cau tra loi trung thuc la khong duoc gi. Class nay la toan bo phan Spring se lam,
- * dai 30 dong, doc mot luot la thay het do thi phu thuoc.
- *
- * <p>Muon quay lai Spring thi doi dung cho nay: bo {@code @Configuration} len class,
- * bien cac field thanh {@code @Bean}, va bootstrap bang
- * {@code new SpringApplicationBuilder(AppContext.class).web(NONE).run()}. Khong cho nao
- * khac trong app biet den su ton tai cua class nay ngoai {@code DictApp}.
- */
-public final class AppContext implements AutoCloseable {
-
+// Nơi duy nhất ráp các thành phần của ứng dụng bằng tay (composition root).
+// Không dùng Spring: chỉ có vài đối tượng và không cần transaction, web hay profile, trong khi Spring
+// thêm ~10 MB jar, 0,5-1,5 giây khởi động (độ trễ đầu tiên người dùng cảm nhận) và làm khó jlink/jpackage.
+// Ngoài DictApp, không chỗ nào khác biết đến lớp này.
+public final class AppContext implements AutoCloseable
+{
     private final Path dataDir;
     private final PackReader pack;
     private final InvertedIndex viIndex;
@@ -57,7 +39,8 @@ public final class AppContext implements AutoCloseable {
 
     private final long startupMillis;
 
-    public AppContext() {
+    public AppContext()
+    {
         long t0 = System.nanoTime();
         this.dataDir = DataLocator.locate();
         this.pack = PackReader.open(dataDir.resolve(DataLocator.PACK_FILE));
@@ -65,88 +48,90 @@ public final class AppContext implements AutoCloseable {
         this.viNoDiacIndex = InvertedIndex.open(dataDir.resolve(IndexFormat.VI_NODIAC_INDEX));
         this.trigramIndex = InvertedIndex.open(dataDir.resolve(IndexFormat.TRIGRAM_INDEX));
 
-        this.catalog = SourceCatalog.loadOrDefault(dataDir.resolve(SourceCatalog.FILE_NAME),
-                "Anh-Việt 109K", pack.entryCount());
+        this.catalog = SourceCatalog.loadOrDefault(dataDir.resolve(SourceCatalog.FILE_NAME), "Anh-Việt 109K",
+                pack.entryCount());
         this.lookupService = new LookupService(pack, catalog);
-        // Thieu lex.bin thi app van chay, chi chon nghia kem hon - khong bat nguoi dung
-        // phai sinh lai du lieu.
+        // Thiếu lex.bin thì app vẫn chạy, chỉ chọn nghĩa kém hơn
         this.lexicalPrior = LexicalPrior.openIfPresent(dataDir.resolve(LexiconFormat.FILE_NAME));
-        // Danh sach tu ghep phai la DUNG cai sinh ra cung luc voi index.
+        // Danh sách từ ghép phải đúng là bản sinh ra cùng lúc với index
         this.compounds = ViCompounds.loadIfPresent(dataDir.resolve(ViCompounds.FILE_NAME));
-        this.reverseSearchService =
-                new ReverseSearchService(pack, viIndex, viNoDiacIndex, trigramIndex,
-                        compounds, lexicalPrior);
+        this.reverseSearchService = new ReverseSearchService(pack, viIndex, viNoDiacIndex, trigramIndex, compounds,
+                lexicalPrior);
         this.reverseSearchService.setCatalog(catalog);
-        // Quet vung KEYS mot lan de lay 5.927 tu mo dau cum - re hon giu mot file rieng.
+        // Quét vùng KEYS một lần để lấy các từ mở đầu cụm, rẻ hơn giữ thêm một file riêng
         this.phraseStarters = pack.multiWordStarters();
         this.glossEngine = new DictionaryGlossEngine(lookupService, phraseStarters, lexicalPrior);
-        this.sentenceEngine =
-                new RuleBasedTranslationEngine(glossEngine, lookupService, lexicalPrior);
+        this.sentenceEngine = new RuleBasedTranslationEngine(glossEngine, lookupService, lexicalPrior);
 
         this.startupMillis = (System.nanoTime() - t0) / 1_000_000;
     }
 
-    public Path dataDir() {
+    public Path dataDir()
+    {
         return dataDir;
     }
 
-    public PackReader pack() {
+    public PackReader pack()
+    {
         return pack;
     }
 
-    public LookupService lookup() {
+    public LookupService lookup()
+    {
         return lookupService;
     }
 
-    public ReverseSearchService search() {
+    public ReverseSearchService search()
+    {
         return reverseSearchService;
     }
 
-    /** Engine chu giai theo cum - dung cho phan chi tiet tung tu. */
-    public TranslationEngine engine() {
+    public TranslationEngine engine()
+    {
         return glossEngine;
     }
 
-    /**
-     * Engine dich ca cau. Khai bao kieu cu the (khong phai {@link TranslationEngine}) vi UI
-     * can goi ca {@code glossSegments}. Khi cam NMT vao sau nay, cho nay doi thanh mot
-     * danh sach engine cho nguoi dung chon.
-     */
-    public RuleBasedTranslationEngine sentenceEngine() {
+    // Khai báo kiểu cụ thể vì giao diện cần gọi glossSegments
+    public RuleBasedTranslationEngine sentenceEngine()
+    {
         return sentenceEngine;
     }
 
-    /** Thoi gian nap du lieu, hien o thanh trang thai lam bang chung do duoc. */
-    public long startupMillis() {
+    // Thời gian nạp dữ liệu, hiện ở thanh trạng thái
+    public long startupMillis()
+    {
         return startupMillis;
     }
 
-    public SourceCatalog catalog() {
+    public SourceCatalog catalog()
+    {
         return catalog;
     }
 
-    /**
-     * Nguoi dung vua bat/tat hoac doi thu tu nguon tu dien (PLAN.md F5).
-     * Ap dung ngay cho ca tra cuu lan tim kiem, roi ghi xuong dia de lan sau mo len van vay.
-     */
-    public void updateCatalog(SourceCatalog updated) {
+    // Người dùng vừa bật/tắt hoặc đổi thứ tự nguồn: áp dụng ngay cho cả tra cứu lẫn tìm kiếm,
+    // rồi ghi xuống đĩa để lần sau mở lên vẫn vậy
+    public void updateCatalog(SourceCatalog updated)
+    {
         this.catalog = updated;
         lookupService.setCatalog(updated);
         reverseSearchService.setCatalog(updated);
         updated.save(dataDir.resolve(SourceCatalog.FILE_NAME));
     }
 
-    public ViCompounds compounds() {
+    public ViCompounds compounds()
+    {
         return compounds;
     }
 
-    public LexicalPrior lexicalPrior() {
+    public LexicalPrior lexicalPrior()
+    {
         return lexicalPrior;
     }
 
     @Override
-    public void close() {
-        // Dong theo thu tu nguoc lai luc mo. Moi cai unmap ngay nho Arena.
+    public void close()
+    {
+        // Đóng ngược thứ tự mở
         lexicalPrior.close();
         trigramIndex.close();
         viNoDiacIndex.close();

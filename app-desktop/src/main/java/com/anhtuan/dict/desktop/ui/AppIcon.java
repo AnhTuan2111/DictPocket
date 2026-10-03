@@ -2,36 +2,57 @@ package com.anhtuan.dict.desktop.ui;
 
 import com.anhtuan.dict.desktop.config.AppVersion;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
 
-/**
- * Icon cua cua so - thanh tieu de, thanh taskbar va Alt+Tab.
- *
- * <p>Nap nhieu co mot luc chu khong nap moi ban 256: JavaFX tu chon co gan nhat roi thu nho,
- * ma thu nho 256 xuong 16 thi nhoe. Ban ve san cho tung co ro hon han - xem
- * {@code scripts/tao-icon.py}.
- *
- * <p>Icon cua BO CAI thi khac, do {@code jpackage --icon} nhung vao file .exe luc dong goi;
- * cho nay chi lo phan cua so luc dang chay.
- */
-public final class AppIcon {
-
-    /** Co nao cung ve rieng, khong phai thu nho tu mot ban. */
+// Icon của cửa sổ (taskbar, Alt+Tab). Icon của bộ cài thì jpackage nhúng vào file .exe.
+public final class AppIcon
+{
+    // Mỗi cỡ là một ảnh vẽ riêng, không thu nhỏ từ ảnh lớn, để 16 px vẫn nét
     private static final int[] SIZES = {16, 32, 48, 256};
 
-    private AppIcon() {}
+    private AppIcon()
+    {
+    }
 
-    public static void applyTo(Stage stage) {
-        String prefix = AppVersion.isAiEdition() ? "app-ai" : "app";
-        for (int size : SIZES) {
-            try (InputStream in = AppIcon.class.getResourceAsStream(
-                    "/icon/" + prefix + "-" + size + ".png")) {
-                if (in != null) stage.getIcons().add(new Image(in));
-            } catch (Exception e) {
-                // Thieu icon khong phai ly do de app khong chay. Cua so se dung icon mac dinh.
+    public static void applyTo(Stage stage)
+    {
+        for (int size : SIZES)
+        {
+            Image image = load(size);
+            if (image != null)
+            {
+                stage.getIcons().add(image);
             }
+        }
+    }
+
+    // Icon nhỏ cho thanh tiêu đề tự vẽ
+    static ImageView titleIcon()
+    {
+        Image image = load(16);
+        if (image == null)
+        {
+            return null;
+        }
+        ImageView view = new ImageView(image);
+        view.setSmooth(false);
+        return view;
+    }
+
+    private static Image load(int size)
+    {
+        String prefix = AppVersion.isAiEdition() ? "app-ai" : "app";
+        try (InputStream in = AppIcon.class.getResourceAsStream("/icon/" + prefix + "-" + size + ".png"))
+        {
+            return in == null ? null : new Image(in);
+        }
+        catch (Exception e)
+        {
+            // Thiếu icon thì dùng icon mặc định, không phải lý do để app không chạy
+            return null;
         }
     }
 }

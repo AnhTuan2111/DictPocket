@@ -1,54 +1,299 @@
 /*
- * Giao dien toi, chu to de doc lau khong moi mat.
- * Khong dung font ngoai: chi Segoe UI (co san tren Windows) va he thong.
- * Tieng Viet can font co du dau - Segoe UI va Consolas deu du.
+ * Giao diện Win9x. Viền nổi và viền lõm dựng bằng nhiều lớp nền chồng nhau
+ * (-fx-background-color kết hợp -fx-background-insets), không dùng ảnh.
+ * Font Tahoma có sẵn trên Windows và đủ dấu tiếng Việt.
  */
 
 .root {
-    -fx-background-color: #1b1d23;
-    -fx-font-family: "Segoe UI", system;
-    -fx-font-size: 14px;
+    -fx-base: #c0c0c0;
+    -fx-background: #c0c0c0;
+    -fx-accent: #000080;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-control-inner-background: #ffffff;
+    -fx-highlight-fill: #000080;
+    -fx-highlight-text-fill: #ffffff;
+    -fx-font-family: "Tahoma";
+    -fx-font-size: 12px;
+    -fx-text-fill: #000000;
 }
 
-/* ---------- thanh cong cu ---------- */
+/* ---------- khung cửa sổ và thanh tiêu đề ---------- */
 
-.toggle-button {
-    -fx-background-color: #262a33;
-    -fx-text-fill: #b9c0cc;
-    -fx-background-radius: 6;
-    -fx-padding: 6 12 6 12;
-    -fx-cursor: hand;
+.window {
+    -fx-background-color: #000000, #ffffff, #808080, #dfdfdf, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1, 1 2 2 1, 2;
+    -fx-padding: 3;
 }
 
-.toggle-button:selected {
-    -fx-background-color: #3b6ea5;
-    -fx-text-fill: white;
+.title-bar {
+    -fx-background-color: linear-gradient(to right, #000080, #1084d0);
+    -fx-padding: 2 2 2 3;
+    -fx-alignment: center-left;
+}
+
+.window:inactive .title-bar {
+    -fx-background-color: linear-gradient(to right, #808080, #b5b5b5);
+}
+
+.title-text {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.caption-button {
+    -fx-min-width: 16;
+    -fx-pref-width: 16;
+    -fx-min-height: 14;
+    -fx-pref-height: 14;
+    -fx-padding: 0;
+}
+
+.glyph {
+    -fx-background-color: #000000;
+}
+
+.glyph-min {
+    -fx-shape: "M0 0 H6 V2 H0 Z";
+    -fx-min-width: 6;
+    -fx-min-height: 2;
+    -fx-max-width: 6;
+    -fx-max-height: 2;
+    -fx-translate-y: 2;
+}
+
+.glyph-max {
+    -fx-shape: "M0 0 H8 V7 H0 Z M1 2 V6 H7 V2 Z";
+    -fx-min-width: 8;
+    -fx-min-height: 7;
+    -fx-max-width: 8;
+    -fx-max-height: 7;
+}
+
+.glyph-close {
+    -fx-shape: "M0 0 H2 V1 H3 V2 H5 V1 H6 V0 H8 V1 H7 V2 H6 V3 H5 V4 H6 V5 H7 V6 H8 V7 H6 V6 H5 V5 H3 V6 H2 V7 H0 V6 H1 V5 H2 V4 H3 V3 H2 V2 H1 V1 H0 Z";
+    -fx-min-width: 8;
+    -fx-min-height: 7;
+    -fx-max-width: 8;
+    -fx-max-height: 7;
+}
+
+/* ---------- nút bấm: nổi, nhấn xuống thì lõm ---------- */
+
+.button, .toggle-button {
+    -fx-background-color: #000000, #ffffff, #808080, #dfdfdf, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1, 1 2 2 1, 2;
+    -fx-background-radius: 0;
+    -fx-padding: 4 12 4 12;
+    -fx-text-fill: #000000;
+}
+
+.button:armed, .toggle-button:armed, .toggle-button:selected {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #e4e4e4;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-padding: 5 11 3 13;
+}
+
+.button:focused, .toggle-button:focused {
+    -fx-border-color: #000000;
+    -fx-border-style: segments(1, 1);
+    -fx-border-insets: 4;
+    -fx-border-width: 1;
+}
+
+.button:disabled {
+    -fx-text-fill: #808080;
+}
+
+.tool {
+    -fx-content-display: top;
+    -fx-graphic-text-gap: 4;
+    -fx-padding: 5 10 4 10;
+}
+
+.tool:armed, .tool:selected {
+    -fx-padding: 6 9 3 11;
+}
+
+.caption-button:armed {
+    -fx-padding: 1 0 0 1;
+}
+
+.source-move {
+    -fx-min-width: 22;
+    -fx-pref-width: 22;
+    -fx-padding: 2 0 2 0;
+    -fx-font-size: 9px;
+}
+
+/* ---------- ô nhập, hộp tích, cuộn ---------- */
+
+.text-field {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #ffffff;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-background-radius: 0;
+    -fx-text-fill: #000000;
+    -fx-prompt-text-fill: #808080;
 }
 
 .search-input {
-    -fx-background-color: #262a33;
-    -fx-text-fill: #e8ecf2;
-    -fx-prompt-text-fill: #6b7280;
-    -fx-background-radius: 6;
-    -fx-padding: 9;
-    -fx-font-size: 15px;
-}
-
-.result-scroll, .result-scroll .viewport {
-    -fx-background-color: transparent;
-}
-
-.status {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 12px;
-}
-
-.message {
-    -fx-text-fill: #9aa4b2;
+    -fx-padding: 7;
     -fx-font-size: 13px;
 }
 
-/* ---------- muc tu ---------- */
+.check-box {
+    -fx-text-fill: #000000;
+}
+
+.check-box .box {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #ffffff;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-background-radius: 0;
+    -fx-padding: 5;
+}
+
+.check-box .mark {
+    -fx-background-color: #000000;
+    -fx-shape: "M0 3 H1 V4 H2 V5 H3 V4 H4 V3 H5 V2 H6 V1 H7 V3 H6 V4 H5 V5 H4 V6 H3 V7 H2 V6 H1 V5 H0 Z";
+    -fx-padding: 3.5;
+    -fx-scale-shape: true;
+}
+
+.check-box:selected .mark {
+    -fx-opacity: 1;
+}
+
+.check-box:indeterminate .mark {
+    -fx-opacity: 1;
+}
+
+.scroll-pane {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #ffffff;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-padding: 2;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #ffffff;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: #c0c0c0;
+}
+
+.scroll-bar {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 0;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 16;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 16;
+}
+
+.scroll-bar > .track {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar > .track-background {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 0;
+}
+
+.scroll-bar > .thumb {
+    -fx-background-color: #000000, #ffffff, #808080, #dfdfdf, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1, 1 2 2 1, 2;
+    -fx-background-radius: 0;
+}
+
+.scroll-bar > .increment-button, .scroll-bar > .decrement-button {
+    -fx-background-color: #000000, #ffffff, #808080, #dfdfdf, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1, 1 2 2 1, 2;
+    -fx-background-radius: 0;
+    -fx-padding: 8 8 8 8;
+}
+
+.scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-background-color: #000000;
+    -fx-background-insets: 0;
+    -fx-padding: 2 3.5 2 3.5;
+}
+
+.scroll-bar:vertical > .increment-button > .increment-arrow {
+    -fx-shape: "M0 0 H7 V1 H6 V2 H5 V3 H4 V4 H3 V3 H2 V2 H1 V1 H0 Z";
+}
+
+.scroll-bar:vertical > .decrement-button > .decrement-arrow {
+    -fx-shape: "M3 0 H4 V1 H5 V2 H6 V3 H7 V4 H0 V3 H1 V2 H2 V1 H3 Z";
+}
+
+.scroll-bar:horizontal > .increment-button > .increment-arrow {
+    -fx-shape: "M0 0 H1 V1 H2 V2 H3 V3 H4 V4 H3 V5 H2 V6 H1 V7 H0 Z";
+}
+
+.scroll-bar:horizontal > .decrement-button > .decrement-arrow {
+    -fx-shape: "M3 0 H4 V7 H3 V6 H2 V5 H1 V4 H0 V3 H1 V2 H2 V1 H3 Z";
+}
+
+/* ---------- menu và chú thích ---------- */
+
+.context-menu {
+    -fx-background-color: #000000, #ffffff, #808080, #dfdfdf, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1, 1 2 2 1, 2;
+    -fx-background-radius: 0;
+    -fx-padding: 4;
+}
+
+.menu-item {
+    -fx-padding: 3 18 3 8;
+}
+
+.menu-item .label {
+    -fx-text-fill: #000000;
+}
+
+.menu-item:focused {
+    -fx-background-color: #000080;
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: #ffffff;
+}
+
+.tooltip {
+    -fx-background-color: #ffffe1;
+    -fx-background-radius: 0;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+    -fx-text-fill: #000000;
+    -fx-font-size: 11px;
+}
+
+/* ---------- thanh trạng thái ---------- */
+
+.status {
+    -fx-background-color: #808080, #ffffff, #c0c0c0;
+    -fx-background-insets: 0, 1 0 0 1, 1 1 1 1;
+    -fx-padding: 3 7 3 7;
+    -fx-text-fill: #000000;
+    -fx-font-size: 11px;
+}
+
+.grip {
+    -fx-min-width: 14;
+    -fx-pref-width: 14;
+    -fx-min-height: 14;
+    -fx-background-color: #c0c0c0;
+    -fx-shape: "M13 1 H14 V14 H1 V13 H13 Z";
+}
+
+/* ---------- mục từ ---------- */
 
 .result-box {
     -fx-padding: 4 2 12 2;
@@ -59,20 +304,20 @@
 }
 
 .headword {
-    -fx-fill: #e8ecf2;
+    -fx-fill: #000080;
     -fx-font-size: 22px;
     -fx-font-weight: bold;
 }
 
 .ipa {
-    -fx-fill: #7f9cc0;
+    -fx-fill: #3a4a80;
     -fx-font-size: 14px;
 }
 
 .variant, .homograph-note {
-    -fx-fill: #6b7280;
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 12px;
+    -fx-fill: #404040;
+    -fx-text-fill: #404040;
+    -fx-font-size: 11px;
 }
 
 .sense {
@@ -80,24 +325,24 @@
 }
 
 .pos {
-    -fx-text-fill: #d8a657;
+    -fx-text-fill: #800000;
     -fx-font-style: italic;
     -fx-padding: 4 0 2 0;
 }
 
 .gloss {
-    -fx-text-fill: #e8ecf2;
+    -fx-text-fill: #000000;
     -fx-padding: 1 0 1 10;
 }
 
 .example {
-    -fx-text-fill: #8c95a3;
-    -fx-font-size: 12.5px;
+    -fx-text-fill: #404040;
+    -fx-font-size: 11.5px;
     -fx-padding: 0 0 0 22;
 }
 
 .section-title {
-    -fx-text-fill: #89b482;
+    -fx-text-fill: #006000;
     -fx-font-weight: bold;
     -fx-padding: 10 0 2 4;
 }
@@ -107,36 +352,36 @@
 }
 
 .idiom-phrase {
-    -fx-text-fill: #89b482;
+    -fx-text-fill: #006000;
+    -fx-font-weight: bold;
 }
 
 .cross-ref {
-    -fx-text-fill: #7f9cc0;
+    -fx-text-fill: #0000ee;
     -fx-padding: 2 0 2 8;
 }
 
 .phrase-card {
-    -fx-background-color: #23301f;
-    -fx-border-color: #89b482;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-border-width: 1;
+    -fx-background-color: #006000, #e4f2de;
+    -fx-background-insets: 0, 1;
     -fx-padding: 8 10 8 10;
 }
 
-/* ---------- dich cau ---------- */
+/* ---------- dịch câu ---------- */
 
 .translation-box {
-    -fx-background-color: #1f2a33;
-    -fx-border-color: #3b6ea5;
-    -fx-border-width: 0 0 0 3;
-    -fx-padding: 12 14 12 14;
-    -fx-background-radius: 6;
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #000080, #ffffe1;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2, 2 2 2 5;
+    -fx-padding: 10 14 10 17;
 }
 
 .translation {
-    -fx-text-fill: #e8ecf2;
-    -fx-font-size: 19px;
+    -fx-text-fill: #000000;
+    -fx-font-size: 18px;
+}
+
+.note {
+    -fx-alignment: top-left;
 }
 
 .gloss-pane {
@@ -144,112 +389,52 @@
 }
 
 .chip {
-    -fx-background-radius: 6;
+    -fx-background-color: #000000, #ffffff, #808080, #c0c0c0;
+    -fx-background-insets: 0, 0 1 1 0, 1 0 0 1, 1 1 1 1;
     -fx-padding: 5 9 5 9;
     -fx-cursor: hand;
 }
 
-.chip-word {
-    -fx-background-color: #262a33;
-}
-
 .chip-phrase {
-    -fx-background-color: #2f4636;
-    -fx-border-color: #89b482;
-    -fx-border-radius: 6;
-    -fx-border-width: 1;
+    -fx-background-color: #006000, #ffffff, #808080, #e4f2de;
+    -fx-background-insets: 0, 1 2 2 1, 1 1 1 1, 1 2 2 1;
 }
 
 .chip-unknown {
-    -fx-background-color: #2b2530;
-    -fx-border-color: #5b4b5f;
-    -fx-border-radius: 6;
-    -fx-border-width: 1;
+    -fx-border-color: #808080;
+    -fx-border-style: dashed;
+    -fx-border-insets: 2;
 }
 
 .chip-source {
-    -fx-text-fill: #e8ecf2;
+    -fx-text-fill: #000000;
     -fx-font-weight: bold;
 }
 
 .chip-gloss {
-    -fx-text-fill: #9fd6a0;
-    -fx-font-size: 12.5px;
+    -fx-text-fill: #006000;
 }
 
 .chip-unknown .chip-gloss {
-    -fx-text-fill: #8c7f95;
+    -fx-text-fill: #404040;
 }
 
 .chip-more {
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: #404040;
     -fx-font-size: 10.5px;
 }
 
 .chip-punct {
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: #404040;
     -fx-padding: 12 0 0 0;
 }
 
-.source-button {
-    -fx-background-color: #262a33;
-    -fx-text-fill: #b9c0cc;
-    -fx-background-radius: 6;
-    -fx-padding: 6 12 6 12;
-    -fx-cursor: hand;
-}
-
-.source-button:hover {
-    -fx-background-color: #2f3540;
-}
-
-.source-dialog {
-    -fx-background-color: #1b1d23;
-}
-
-.source-row {
-    -fx-background-color: #21242c;
-    -fx-background-radius: 6;
-    -fx-padding: 8 10 8 10;
-    -fx-alignment: center-left;
-}
-
-.source-row .check-box {
-    -fx-text-fill: #e8ecf2;
-    -fx-font-size: 14px;
-}
-
-.source-count {
-    -fx-text-fill: #6b7280;
+.message {
+    -fx-text-fill: #404040;
     -fx-font-size: 12px;
 }
 
-.source-move {
-    -fx-background-color: #2b303a;
-    -fx-text-fill: #b9c0cc;
-    -fx-background-radius: 4;
-    -fx-padding: 2 8 2 8;
-    -fx-cursor: hand;
-}
-
-.source-warning {
-    -fx-text-fill: #d8a657;
-    -fx-font-size: 12.5px;
-}
-
-.nmt-toggle {
-    -fx-text-fill: #d8a657;
-    -fx-font-size: 12.5px;
-    -fx-cursor: hand;
-}
-
-.nmt-toggle .box {
-    -fx-background-color: #262a33;
-    -fx-border-color: #d8a657;
-    -fx-border-radius: 3;
-}
-
-/* ---------- goi y chinh ta ---------- */
+/* ---------- gợi ý và kết quả Việt → Anh ---------- */
 
 .suggestion-row {
     -fx-padding: 2 0 6 0;
@@ -257,55 +442,80 @@
 }
 
 .suggestion-link {
-    -fx-text-fill: #7f9cc0;
-    -fx-font-size: 15px;
+    -fx-text-fill: #0000ee;
+    -fx-font-size: 14px;
     -fx-underline: true;
     -fx-cursor: hand;
 }
 
-.suggestion-link:hover {
-    -fx-text-fill: #a8c4e0;
-}
-
-/* ---------- ket qua Viet -> Anh ---------- */
-
 .hit {
-    -fx-background-color: #21242c;
-    -fx-background-radius: 6;
-    -fx-padding: 7 10 7 10;
+    -fx-border-color: transparent transparent #808080 transparent;
+    -fx-border-style: dotted;
+    -fx-padding: 6 10 6 10;
     -fx-cursor: hand;
 }
 
 .hit:hover {
-    -fx-background-color: #2b303a;
+    -fx-background-color: #000080;
 }
 
 .hit-rank {
-    -fx-fill: #6b7280;
+    -fx-fill: #808080;
 }
 
 .hit-word {
-    -fx-fill: #e8ecf2;
+    -fx-fill: #000000;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
+.hit-ipa {
+    -fx-fill: #3a4a80;
+}
+
 .hit-gloss {
-    -fx-text-fill: #9aa4b2;
+    -fx-text-fill: #404040;
+}
+
+.hit:hover .hit-rank, .hit:hover .hit-word, .hit:hover .hit-ipa {
+    -fx-fill: #ffffff;
+}
+
+.hit:hover .hit-gloss {
+    -fx-text-fill: #ffffff;
+}
+
+/* ---------- hộp thoại ---------- */
+
+.source-row {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #ffffff;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-padding: 6 8 6 8;
+    -fx-alignment: center-left;
+}
+
+.source-count {
+    -fx-text-fill: #404040;
+    -fx-font-size: 11px;
+}
+
+.source-warning {
+    -fx-text-fill: #8a5a00;
+    -fx-graphic-text-gap: 8;
+}
+
+.nmt-toggle {
+    -fx-text-fill: #000000;
+    -fx-graphic-text-gap: 5;
+}
+
+.headline-text {
+    -fx-font-weight: bold;
     -fx-font-size: 13px;
 }
 
-/* ---------- menu doi nghia ---------- */
-
-.context-menu {
-    -fx-background-color: #262a33;
-    -fx-background-radius: 6;
-}
-
-.menu-item .label {
-    -fx-text-fill: #e8ecf2;
-}
-
-.menu-item:focused {
-    -fx-background-color: #3b6ea5;
+.technical {
+    -fx-font-family: "Lucida Console", "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-text-fill: #404040;
 }

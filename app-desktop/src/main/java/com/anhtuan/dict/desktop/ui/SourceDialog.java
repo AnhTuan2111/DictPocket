@@ -4,7 +4,7 @@ import com.anhtuan.dict.core.source.DictSource;
 import com.anhtuan.dict.core.source.SourceCatalog;
 import com.anhtuan.dict.desktop.config.AppContext;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -18,26 +18,20 @@ import javafx.stage.Window;
 
 import java.util.Locale;
 
-/**
- * Cua so quan ly nguon tu dien: bat / tat / doi thu tu uu tien (PLAN.md F5, M7).
- *
- * <p>Bat-tat co hieu luc NGAY, khong phai sinh lai du lieu: moi muc tu trong pack mang san
- * {@code sourceId} nen tat mot nguon chi la mot phep loc. Doi lai, THEM mot nguon moi thi
- * phai chay lai lenh {@code build} - pack la file bat bien.
- */
-final class SourceDialog {
+// Quản lý nguồn từ điển: bật / tắt / đổi thứ tự ưu tiên. Có hiệu lực ngay, không phải sinh lại
+// dữ liệu vì mỗi mục từ trong pack mang sẵn sourceId, tắt một nguồn chỉ là một phép lọc.
+// Thêm nguồn mới thì phải chạy lại lệnh build, vì pack là file bất biến.
+final class SourceDialog
+{
+    private SourceDialog()
+    {
+    }
 
-    private SourceDialog() {}
-
-    static void show(Window owner, AppContext ctx, Runnable onChanged) {
+    static void show(Window owner, AppContext ctx, Runnable onChanged)
+    {
         Stage stage = new Stage();
         stage.initOwner(owner);
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Nguồn từ điển");
-
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(14));
-        root.getStyleClass().add("source-dialog");
 
         VBox list = new VBox(6);
         render(list, ctx, onChanged);
@@ -46,71 +40,74 @@ final class SourceDialog {
                 Bật/tắt có hiệu lực ngay. Nguồn ở trên được ưu tiên: nghĩa của nó hiện trước.
 
                 Thêm nguồn mới (một file .tsv hai cột: từ tiếng Anh <TAB> nghĩa tiếng Việt):
-                  ImporterMain build anhviet109K.txt data/build tudien-cua-ban.tsv
+                  ImporterMain build anhviet109K.txt data/build your-dictionary.tsv
                 """);
         note.getStyleClass().add("message");
         note.setWrapText(true);
 
         Button close = new Button("Đóng");
+        close.getStyleClass().add("dialog-button");
         close.setOnAction(e -> stage.close());
         HBox bottom = new HBox(close);
-        bottom.setStyle("-fx-alignment: center-right;");
+        bottom.setAlignment(Pos.CENTER_RIGHT);
 
-        root.getChildren().addAll(list, note, bottom);
-        Scene scene = new Scene(root, 520, 360);
-        scene.getStylesheets().add(SourceDialog.class.getResource("/css/dict.css").toExternalForm());
-        stage.setScene(scene);
+        VBox content = new VBox(10, list, note, bottom);
+        content.setPadding(new Insets(12));
+        WindowChrome.install(stage, PixelIcons.small("folder"), "Nguồn từ điển", content, 540, 380, false);
         stage.showAndWait();
     }
 
-    private static void render(VBox list, AppContext ctx, Runnable onChanged) {
+    private static void render(VBox list, AppContext ctx, Runnable onChanged)
+    {
         list.getChildren().clear();
         SourceCatalog catalog = ctx.catalog();
 
-        for (DictSource source : catalog.all()) {
+        for (DictSource source : catalog.all())
+        {
             HBox row = new HBox(8);
             row.getStyleClass().add("source-row");
 
             CheckBox enabled = new CheckBox(source.name());
             enabled.setSelected(source.enabled());
-            enabled.setOnAction(e -> {
+            enabled.setOnAction(e ->
+            {
                 ctx.updateCatalog(ctx.catalog().setEnabled(source.id(), enabled.isSelected()));
                 render(list, ctx, onChanged);
                 onChanged.run();
             });
 
-            Label count = new Label(String.format(Locale.ROOT, "%,d mục · %s",
-                    source.entries(), source.format()));
+            Label count = new Label(String.format(Locale.ROOT, "%,d mục · %s", source.entries(), source.format()));
             count.getStyleClass().add("source-count");
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            Button up = new Button("▲");
-            up.setOnAction(e -> {
-                ctx.updateCatalog(ctx.catalog().move(source.id(), -1));
-                render(list, ctx, onChanged);
-                onChanged.run();
-            });
-            Button down = new Button("▼");
-            down.setOnAction(e -> {
-                ctx.updateCatalog(ctx.catalog().move(source.id(), 1));
-                render(list, ctx, onChanged);
-                onChanged.run();
-            });
-            up.getStyleClass().add("source-move");
-            down.getStyleClass().add("source-move");
-
-            row.getChildren().addAll(enabled, count, spacer, up, down);
+            row.getChildren().addAll(enabled, count, spacer, moveButton("▲", -1, source, ctx, list, onChanged),
+                    moveButton("▼", 1, source, ctx, list, onChanged));
             list.getChildren().add(row);
         }
 
-        if (!catalog.hasEnabled()) {
-            Label warn = new Label("Đã tắt hết nguồn — ứng dụng đang dùng lại tất cả để "
-                    + "màn hình không trống trơn.");
-            warn.getStyleClass().add("source-warning");
-            warn.setWrapText(true);
-            list.getChildren().add(warn);
+        if (!catalog.hasEnabled())
+        {
+            Label warning = new Label("Đã tắt hết nguồn — ứng dụng đang dùng lại tất cả để màn hình không trống trơn.",
+                    PixelIcons.large("warn"));
+            warning.getStyleClass().add("source-warning");
+            warning.setWrapText(true);
+            list.getChildren().add(warning);
         }
+    }
+
+    private static Button moveButton(String text, int delta, DictSource source, AppContext ctx, VBox list,
+            Runnable onChanged)
+    {
+        Button button = new Button(text);
+        button.getStyleClass().add("source-move");
+        button.setOnAction(e ->
+        {
+            ctx.updateCatalog(ctx.catalog().move(source.id(), delta));
+            render(list, ctx, onChanged);
+            onChanged.run();
+        });
+        return button;
     }
 }
