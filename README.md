@@ -22,10 +22,11 @@ dịch máy nơ-ron.
 
 | Bản | Dịch câu bằng | Kích thước | Nên dùng khi |
 |---|---|---|---|
-| `TuDienOffline-1.0.0.msi` | Từ điển + luật ngữ pháp. **Không có mô hình AI nào.** | ~46 MB | Tra từ, dịch câu ngắn, máy yếu |
-| `TuDienOffline-AI-1.0.0.msi` | Thêm mô hình nơ-ron chạy cục bộ | ~185 MB | Cần dịch câu dài, câu bị động, mệnh đề quan hệ |
+| `TuDienOffline-1.0.1.msi` | Từ điển + luật ngữ pháp. **Không có mô hình AI nào.** | ~46 MB | Tra từ, dịch câu ngắn, máy yếu |
+| `TuDienOffline-AI-1.0.1.msi` | Thêm mô hình nơ-ron chạy cục bộ | ~185 MB | Cần dịch câu dài, câu bị động, mệnh đề quan hệ |
 
 Tải ở mục [Releases](https://github.com/AnhTuan2111/offline-translate-vi-en/releases).
+Cài vào `%LOCALAPPDATA%`, **không cần quyền administrator**.
 Cài được **cả hai song song** — tên ứng dụng khác nhau, icon khác màu.
 
 ### Các bước
@@ -35,7 +36,7 @@ Cài được **cả hai song song** — tên ứng dụng khác nhau, icon khá
    **More info** → **Run anyway**. Muốn yên tâm thì đối chiếu mã băm trước khi cài:
 
    ```powershell
-   Get-FileHash .\TuDienOffline-1.0.0.msi -Algorithm SHA256
+   Get-FileHash .\TuDienOffline-1.0.1.msi -Algorithm SHA256
    ```
 
    So với `SHA256SUMS.txt` đi kèm bản phát hành. Khớp nghĩa là file bạn tải đúng là file
@@ -48,7 +49,7 @@ Cài được **cả hai song song** — tên ứng dụng khác nhau, icon khá
 Bản `.zip` giải nén ra chạy ngay, không đụng vào registry, xoá thư mục là sạch:
 
 ```powershell
-Expand-Archive TuDienOffline-1.0.0-windows.zip -DestinationPath D:\TuDien
+Expand-Archive TuDienOffline-1.0.1-windows.zip -DestinationPath D:\TuDien
 D:\TuDien\TuDienOffline\TuDienOffline.exe
 ```
 
@@ -137,7 +138,7 @@ git merge main
 .\scripts\dong-goi.ps1                          # thư mục chạy ngay, không cần cài
 .\scripts\dong-goi.ps1 -Type msi                # bộ cài .msi
 .\scripts\dong-goi.ps1 -Type msi -WithNmt       # bộ cài kèm mô hình AI
-.\scripts\phat-hanh.ps1 -Version 1.0.0          # cả hai bản + SHA256 + gắn thẻ git
+.\scripts\phat-hanh.ps1 -Version 1.0.1          # cả hai bản + SHA256 + gắn thẻ git
 ```
 
 `.msi` cần **WiX Toolset 3.x**. Không phải cài vào máy: tải bản portable
