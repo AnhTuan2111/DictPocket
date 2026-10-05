@@ -18,6 +18,13 @@ Tên file không mang số phiên bản, nên link tải trong README luôn đú
 
 ## [Chưa phát hành]
 
+### Thêm
+- **Lịch sử tra.** Nút "Lịch sử" (hoặc `Ctrl+H`) mở danh sách những gì đã tra, mới nhất trước, mỗi mục kèm
+  giờ và chế độ: gõ để lọc, bấm đúp hoặc Enter để tra lại, `Delete` hoặc "Xoá mục" để bỏ một mục, "Xoá hết"
+  (bấm hai lần cho chắc). Trong ô nhập, phím `↑` `↓` gọi lại câu đã tra như ở dòng lệnh. Lịch sử lưu trên máy
+  người dùng, ở `%APPDATA%\DictPocket\history.tsv` (file văn bản, giữ 1.000 mục gần nhất), không gửi đi đâu và
+  không mất khi gỡ hay cài đè phần mềm.
+
 ### Sửa
 - **Dán đoạn văn dài giờ dịch đủ.** Trước đây bản AI chỉ dịch được vài câu đầu rồi mất dấu chấm
   và bỏ câu sau; nay cả hai bản tách đoạn thành từng câu, dịch từng câu rồi nối lại. Bản thường

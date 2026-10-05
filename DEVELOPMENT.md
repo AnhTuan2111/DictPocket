@@ -24,6 +24,9 @@ Những lần sau chạy `.\scripts\run.ps1` là đủ.
 | `mvn test` | toàn bộ test |
 | `java -jar dict-importer\target\dict-importer.jar verify data\build` | nghiệm thu dữ liệu |
 
+Lịch sử tra nằm ở `%APPDATA%\DictPocket\history.tsv`; chạy từ mã nguồn thì đổi chỗ bằng `-Ddict.history=<file>` để
+khỏi đụng vào lịch sử thật (lúc chụp ảnh bằng `-Screenshot` lịch sử chỉ giữ trong bộ nhớ).
+
 ## Thêm từ điển riêng
 
 File `.tsv`, mỗi dòng một mục, phân cách bằng **Tab**: `từ tiếng Anh`, `nghĩa tiếng Việt`, `từ loại` (có thể bỏ trống).

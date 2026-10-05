@@ -41,7 +41,8 @@ Bấm nút trên cùng để đổi chế độ, gõ vào ô rồi bấm Enter.
 | **Dịch câu** | Dán cả câu. Dưới bản dịch là chú giải từng cụm; ô nào có `▾` thì bấm vào để chọn nghĩa khác. |
 | **Việt → Anh** | Gõ tiếng Việt ra danh sách từ tiếng Anh. Gõ không dấu cũng được. |
 
-Phím tắt: `Ctrl`+`1` / `2` / `3` đổi chế độ, `Ctrl`+`L` về ô nhập.
+Phím tắt: `Ctrl`+`1` / `2` / `3` đổi chế độ, `Ctrl`+`L` về ô nhập, `Ctrl`+`H` xem lịch sử, phím `↑` `↓` trong ô nhập
+gọi lại câu đã tra. Nút **Lịch sử** liệt kê những gì bạn đã tra: gõ để lọc, bấm đúp để tra lại, xoá từng mục hoặc xoá hết.
 Nút **Nguồn từ điển** để bật/tắt từng bộ từ điển và đổi thứ tự ưu tiên. Ví dụ đọc tài liệu kỹ thuật thì kéo
 "Thuật ngữ CNTT" lên trên: `platform` ra *nền tảng* thay vì *sân ga*.
 
@@ -59,6 +60,9 @@ Nút **Nguồn từ điển** để bật/tắt từng bộ từ điển và đ�
 
 **Đang dùng bản cũ tên "Từ điển offline" (TuDienOffline)?** DictPocket là ứng dụng riêng nên bản cũ vẫn còn:
 gỡ nó trong **Settings → Apps**. Không mất dữ liệu gì.
+
+**Lịch sử tra lưu ở đâu?** Trong file `history.tsv` ở thư mục `%APPDATA%\DictPocket` trên máy bạn, không gửi đi đâu.
+Gỡ cài đặt không xoá file này; muốn xoá sạch thì bấm **Xoá hết** trong hộp thoại Lịch sử.
 
 **Máy yếu chạy được không?** Được: khoảng 150 MB RAM, mở lên chưa đến 2 giây.
 
