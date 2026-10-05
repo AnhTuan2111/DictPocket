@@ -8,6 +8,7 @@ import com.anhtuan.dict.core.model.Candidate;
 import com.anhtuan.dict.core.model.Segment;
 import com.anhtuan.dict.core.model.SegmentKind;
 import com.anhtuan.dict.core.nlp.SentenceSplitter;
+import com.anhtuan.dict.core.nlp.TextNormalizer;
 import com.anhtuan.dict.core.spi.TranslationEngine;
 
 import java.io.Closeable;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 // Dịch cả câu bằng mô hình nơ-ron chạy cục bộ trên CPU (opus-mt-en-vi, ~101 MB, 6 lớp encoder
 // + 6 lớp decoder). Khác hai engine kia (chỉ tra từ điển và áp luật), đây là AI thật, nên UI
@@ -39,6 +41,8 @@ public final class OnnxNmtEngine implements TranslationEngine, Closeable
     // Ngưỡng ký tự để cắt thêm một câu rất dài; ~400 ký tự tương đương dưới 150 token, an toàn so với MAX_INPUT_TOKENS
     private static final int MAX_SENTENCE_CHARS = 400;
     private static final int MAX_OUTPUT_TOKENS = 256;
+    // Mô hình học từ phụ đề phim nên đôi khi chèn mã định dạng phụ đề kiểu {\3cHFF1000} vào kết quả
+    private static final Pattern SUBTITLE_TAG = Pattern.compile("\\{\\\\[^}]*}");
 
     // Cấm sinh lại một dãy NO_REPEAT_NGRAM từ đã từng xuất hiện. Giải mã tham lam gặp câu không
     // đủ chủ ngữ - vị ngữ (dòng tiêu đề, gạch đầu dòng) sẽ không biết dừng và lặp một cụm đến hết
@@ -146,6 +150,10 @@ public final class OnnxNmtEngine implements TranslationEngine, Closeable
     // sức thì cắt ở dấu phẩy thay vì để đầu vào bị cắt cụt âm thầm ở MAX_INPUT_TOKENS.
     private String translateSentence(String sentence)
     {
+        // Chỉ có số hoặc dấu câu, hay không phải tiếng Anh: mô hình không có gì để dịch và sẽ bịa ra một
+        // câu thoại phụ đề, nên trả lại nguyên văn
+        if (!containsLetter(sentence) || TextNormalizer.looksVietnamese(sentence))
+            return sentence.strip();
         List<String> pieces = SentenceSplitter.splitLong(sentence, MAX_SENTENCE_CHARS);
         if (pieces.size() == 1)
             return translateToString(sentence);
@@ -184,13 +192,32 @@ public final class OnnxNmtEngine implements TranslationEngine, Closeable
             try (OrtSession.Result encoded = encoder.run(encoderInput))
             {
                 float[][][] hidden = (float[][][]) encoded.get(0).getValue();
-                return decodeBeam(hidden, maskRow);
+                return cleanOutput(sentence, decodeBeam(hidden, maskRow));
             }
         }
         catch (OrtException e)
         {
             throw new IllegalStateException("error while running the model: " + e.getMessage(), e);
         }
+    }
+
+    private static boolean containsLetter(String s)
+    {
+        for (int i = 0; i < s.length(); i++)
+        {
+            if (Character.isLetter(s.charAt(i)))
+                return true;
+        }
+        return false;
+    }
+
+    // Bỏ mã định dạng phụ đề và gạch đầu dòng thoại mà mô hình học từ phụ đề phim có thể chèn vào
+    private static String cleanOutput(String source, String vi)
+    {
+        String out = SUBTITLE_TAG.matcher(vi).replaceAll("").strip();
+        if (out.startsWith("- ") && !source.stripLeading().startsWith("-"))
+            out = out.substring(2).strip();
+        return out.isEmpty() ? source.strip() : out;
     }
 
     // Thêm dấu chấm nếu câu chưa có dấu kết thúc: model được huấn luyện trên CÂU HOÀN CHỈNH, đưa
