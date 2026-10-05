@@ -7,6 +7,7 @@ import ai.onnxruntime.OrtSession;
 import com.anhtuan.dict.core.model.Candidate;
 import com.anhtuan.dict.core.model.Segment;
 import com.anhtuan.dict.core.model.SegmentKind;
+import com.anhtuan.dict.core.nlp.SentenceSplitter;
 import com.anhtuan.dict.core.spi.TranslationEngine;
 
 import java.io.Closeable;
@@ -35,6 +36,8 @@ public final class OnnxNmtEngine implements TranslationEngine, Closeable
     public static final String MODEL_DIR = "nmt-en-vi";
 
     private static final int MAX_INPUT_TOKENS = 200;
+    // Ngưỡng ký tự để cắt thêm một câu rất dài; ~400 ký tự tương đương dưới 150 token, an toàn so với MAX_INPUT_TOKENS
+    private static final int MAX_SENTENCE_CHARS = 400;
     private static final int MAX_OUTPUT_TOKENS = 256;
 
     // Cấm sinh lại một dãy NO_REPEAT_NGRAM từ đã từng xuất hiện. Giải mã tham lam gặp câu không
@@ -124,13 +127,41 @@ public final class OnnxNmtEngine implements TranslationEngine, Closeable
     }
 
     @Override
-    public List<Segment> translate(String sentence)
+    public List<Segment> translate(String text)
     {
-        if (sentence == null || sentence.isBlank())
+        if (text == null || text.isBlank())
             return List.of();
-        String vi = translateToString(sentence);
-        return List.of(new Segment(sentence, 0, sentence.length(), SegmentKind.TRANSLATED,
-                List.of(new Candidate(sentence, vi, null, 1.0))));
+        StringBuilder vi = new StringBuilder();
+        for (String sentence : SentenceSplitter.split(text))
+        {
+            if (!vi.isEmpty())
+                vi.append(' ');
+            vi.append(translateSentence(sentence));
+        }
+        return List.of(new Segment(text, 0, text.length(), SegmentKind.TRANSLATED,
+                List.of(new Candidate(text, vi.toString(), null, 1.0))));
+    }
+
+    // Mô hình học trên từng câu: đưa cả đoạn vào thì nó bỏ câu, mất dấu chấm hoặc dừng sớm. Câu dài quá
+    // sức thì cắt ở dấu phẩy thay vì để đầu vào bị cắt cụt âm thầm ở MAX_INPUT_TOKENS.
+    private String translateSentence(String sentence)
+    {
+        List<String> pieces = SentenceSplitter.splitLong(sentence, MAX_SENTENCE_CHARS);
+        if (pieces.size() == 1)
+            return translateToString(sentence);
+        StringBuilder vi = new StringBuilder();
+        for (int i = 0; i < pieces.size(); i++)
+        {
+            String part = translateToString(pieces.get(i));
+            // Mảnh giữa câu được thêm dấu chấm giả để mô hình dừng: đổi lại thành dấu phẩy
+            boolean last = i == pieces.size() - 1;
+            if (!last && part.endsWith("."))
+                part = part.substring(0, part.length() - 1) + ",";
+            if (!vi.isEmpty())
+                vi.append(' ');
+            vi.append(part);
+        }
+        return vi.toString();
     }
 
     private String translateToString(String sentence)
