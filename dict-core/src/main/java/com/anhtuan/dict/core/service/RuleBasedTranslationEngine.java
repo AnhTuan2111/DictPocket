@@ -6,6 +6,7 @@ import com.anhtuan.dict.core.model.Segment;
 import com.anhtuan.dict.core.model.SegmentKind;
 import com.anhtuan.dict.core.nlp.FunctionWords;
 import com.anhtuan.dict.core.nlp.Lemmatizer;
+import com.anhtuan.dict.core.nlp.SentenceSplitter;
 import com.anhtuan.dict.core.nlp.TextNormalizer;
 import com.anhtuan.dict.core.spi.TranslationEngine;
 
@@ -88,20 +89,33 @@ public final class RuleBasedTranslationEngine implements TranslationEngine
     }
 
     @Override
-    public List<Segment> translate(String sentence)
+    public List<Segment> translate(String text)
     {
-        if (sentence == null || sentence.isBlank())
+        if (text == null || text.isBlank())
             return List.of();
 
+        // Đoạn nhiều câu thì dịch từng câu: luật sắp xếp lại trật tự chỉ đúng trong phạm vi một câu,
+        // và mỗi câu cần được viết hoa đầu riêng
+        List<String> sentences = SentenceSplitter.split(text);
+        StringBuilder vi = new StringBuilder();
+        for (String sentence : sentences)
+        {
+            if (!vi.isEmpty())
+                vi.append(' ');
+            vi.append(translateOne(sentence));
+        }
+        return List.of(new Segment(text, 0, text.length(), SegmentKind.TRANSLATED,
+                List.of(new Candidate(text, vi.toString(), null, 1.0))));
+    }
+
+    private String translateOne(String sentence)
+    {
         List<Item> items = toItems(glossEngine.translate(sentence));
         assignPartOfSpeech(items);
         chooseVietnamese(items);
         markComparatives(items);
         applyGrammarRules(items);
-        String vi = join(items);
-
-        return List.of(new Segment(sentence, 0, sentence.length(), SegmentKind.TRANSLATED,
-                List.of(new Candidate(sentence, vi, null, 1.0))));
+        return join(items);
     }
 
     // Bản chú giải từng cụm: UI hiện dưới câu dịch để người dùng đối chiếu và sửa.

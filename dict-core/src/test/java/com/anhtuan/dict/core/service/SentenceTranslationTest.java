@@ -92,6 +92,18 @@ class SentenceTranslationTest
     }
 
     @Test
+    @DisplayName("a paragraph is translated sentence by sentence and every sentence starts with a capital")
+    void paragraphIsTranslatedPerSentence()
+    {
+        String first = translate("The old system.");
+        String second = translate("This book.");
+        assertEquals(first + " " + second, translate("The old system. This book."));
+        assertTrue(second.charAt(0) == Character.toUpperCase(second.charAt(0)), second);
+        // Xuống dòng giữa đoạn cũng là ranh giới câu
+        assertEquals(translate("The old system. This book."), translate("The old system.\nThis book."));
+    }
+
+    @Test
     @DisplayName("possessive moves after the noun: his job -> việc của anh ấy")
     void possessiveMovesAfterNoun()
     {
