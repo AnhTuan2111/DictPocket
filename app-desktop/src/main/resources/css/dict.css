@@ -153,18 +153,15 @@
 }
 
 .check-box .mark {
-    -fx-background-color: #000000;
+    -fx-background-color: transparent;
     -fx-shape: "M0 3 H1 V4 H2 V5 H3 V4 H4 V3 H5 V2 H6 V1 H7 V3 H6 V4 H5 V5 H4 V6 H3 V7 H2 V6 H1 V5 H0 Z";
     -fx-padding: 3.5;
     -fx-scale-shape: true;
 }
 
+/* Dấu tích chỉ hiện khi ô đã chọn */
 .check-box:selected .mark {
-    -fx-opacity: 1;
-}
-
-.check-box:indeterminate .mark {
-    -fx-opacity: 1;
+    -fx-background-color: #000000;
 }
 
 .scroll-pane {

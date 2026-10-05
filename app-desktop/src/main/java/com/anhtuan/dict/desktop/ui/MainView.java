@@ -56,7 +56,7 @@ public final class MainView
     }
 
     private final AppContext ctx;
-    private final TextField input = new TextField();
+    private final TextField input = new SearchField();
     private final VBox resultHolder = new VBox();
     private final ScrollPane resultScroll = new ScrollPane(resultHolder);
     private final Label status = new Label();
