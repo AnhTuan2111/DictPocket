@@ -18,6 +18,9 @@ Tên file không mang số phiên bản, nên link tải trong README luôn đú
 
 ## [Chưa phát hành]
 
+
+## [1.2.0] — 2026-10-05
+
 ### Thêm
 - **Lịch sử tra.** Nút "Lịch sử" (hoặc `Ctrl+H`) mở danh sách những gì đã tra, mới nhất trước, mỗi mục kèm
   giờ và chế độ: gõ để lọc, bấm đúp hoặc Enter để tra lại, `Delete` hoặc "Xoá mục" để bỏ một mục, "Xoá hết"
@@ -172,7 +175,8 @@ Bản phát hành đầu tiên.
 - **Nhét từ ghép tiếng Việt vào chỉ mục**: làm xong, đo, thấy chỉ mục phình 47% mà thứ tự
   kết quả gần như không đổi → bỏ. Danh sách từ ghép chuyển sang dùng cho gợi ý chính tả.
 
-[Chưa phát hành]: https://github.com/AnhTuan2111/DictPocket/compare/v1.1.0...HEAD
+[Chưa phát hành]: https://github.com/AnhTuan2111/DictPocket/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/AnhTuan2111/DictPocket/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/AnhTuan2111/DictPocket/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/AnhTuan2111/DictPocket/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AnhTuan2111/DictPocket/releases/tag/v1.0.0
