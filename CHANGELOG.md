@@ -26,6 +26,15 @@ Tên file không mang số phiên bản, nên link tải trong README luôn đú
 - **Dán văn bản có xuống dòng không còn dính chữ.** Ô nhập của JavaFX xoá dấu xuống dòng khi dán,
   nên chữ cuối dòng dính với chữ đầu dòng sau ("the" + "result" thành "theresult"). Nay mỗi chỗ
   xuống dòng thành một dấu cách.
+- **Số, đường link và `e.g.` không bị chặt nữa.** Bản thường dịch "3.5 percent" thành "3. 5 phần
+  trăm" và làm vỡ đường link; nay giữ nguyên `3.5`, `1,000`, `10:30`, `12/05`, link và `e.g.`/`i.e.`.
+- **Bản AI không bịa nữa.** Với đầu vào chỉ có số hoặc dấu câu (`123`, `...`), hoặc là tiếng Việt,
+  mô hình từng sinh ra câu thoại phụ đề không liên quan, kèm mã định dạng kiểu `{\3cHFF1000}`. Nay
+  những đầu vào đó được trả lại nguyên văn, mã phụ đề và gạch đầu dòng thoại bị loại khỏi kết quả.
+- Dán tiếng Việt vào chế độ Dịch câu thì có thông báo thay vì ra chữ vô nghĩa. Tra một từ đơn khi
+  đang bật AI thì dùng từ điển (mô hình hay bịa với một từ lẻ).
+- Dịch đoạn dài bằng AI hiện tiến độ "câu 12/80", và tra lại giữa chừng thì lượt dịch cũ bị huỷ
+  thay vì đè kết quả cũ lên kết quả mới.
 - **Ô tích hiện đúng trạng thái.** Dấu tích luôn hiện kể cả khi chưa chọn (ô "Dùng mô hình AI" và
   các ô bật/tắt nguồn trong hộp thoại Nguồn từ điển); chức năng vẫn chạy đúng.
 
