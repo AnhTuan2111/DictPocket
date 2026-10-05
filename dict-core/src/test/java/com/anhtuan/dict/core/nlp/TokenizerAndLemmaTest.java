@@ -33,6 +33,24 @@ class TokenizerAndLemmaTest
     }
 
     @Test
+    @DisplayName("numbers keep their decimal point, thousands separator, time and date")
+    void numbersStayWhole()
+    {
+        List<String> words = Tokenizer.tokenize("It rose 3.5 percent to 1,000 at 10:30 on 12/05.").stream().filter(Tokenizer.Token::isWord)
+                .map(Tokenizer.Token::text).toList();
+        assertEquals(List.of("It", "rose", "3.5", "percent", "to", "1,000", "at", "10:30", "on", "12/05"), words);
+    }
+
+    @Test
+    @DisplayName("links and e.g./i.e. are single tokens and a final sentence period is left out of a link")
+    void linksAndLatinAbbreviationsStayWhole()
+    {
+        List<String> words = Tokenizer.tokenize("See https://example.com/a.b now, e.g. here or www.site.org/x.").stream()
+                .filter(Tokenizer.Token::isWord).map(Tokenizer.Token::text).toList();
+        assertEquals(List.of("See", "https://example.com/a.b", "now", "e.g.", "here", "or", "www.site.org/x"), words);
+    }
+
+    @Test
     @DisplayName("apostrophes and hyphens stay inside words, punctuation does not")
     void apostropheAndHyphenStayInsideWords()
     {

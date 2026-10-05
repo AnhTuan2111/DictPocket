@@ -102,4 +102,15 @@ class TextNormalizerTest
                     "normalizing twice gave a different result for: " + s);
         }
     }
+
+    @Test
+    @DisplayName("Vietnamese-only letters are detected, plain English and French loanwords are not")
+    void detectsVietnamese()
+    {
+        assertTrue(TextNormalizer.looksVietnamese("xin chào các bạn"));
+        assertTrue(TextNormalizer.looksVietnamese("Hôm nay trời đẹp"));
+        assertFalse(TextNormalizer.looksVietnamese("The old system could not keep up"));
+        assertFalse(TextNormalizer.looksVietnamese("A café near the résumé desk"));
+        assertFalse(TextNormalizer.looksVietnamese(null));
+    }
 }

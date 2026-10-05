@@ -7,6 +7,8 @@ import java.util.Locale;
 // search trượt.
 public final class TextNormalizer
 {
+    private static final String VIETNAMESE_ONLY = "ăâđêôơưạảãấầẩẫậắằẳẵặẹẻẽếềểễệịỉĩọỏõốồổỗộớờởỡợụủũứừửữựỵỷỹỳ";
+
     private TextNormalizer()
     {
     }
@@ -26,6 +28,20 @@ public final class TextNormalizer
     }
 
     // Bỏ dấu tiếng Việt cho search không dấu.
+    // Có chữ mang dấu đặc trưng tiếng Việt (ă â đ ê ô ơ ư và các nguyên âm có dấu thanh nặng/hỏi/ngã) mà
+    // tiếng Anh không dùng. Chữ có dấu chung với tiếng Pháp như é, è, á không tính để "café" không bị nhận nhầm.
+    public static boolean looksVietnamese(String text)
+    {
+        if (text == null)
+            return false;
+        for (int i = 0; i < text.length(); i++)
+        {
+            if (VIETNAMESE_ONLY.indexOf(Character.toLowerCase(text.charAt(i))) >= 0)
+                return true;
+        }
+        return false;
+    }
+
     public static String removeDiacritics(String s)
     {
         if (s == null)
