@@ -18,6 +18,17 @@ Tên file không mang số phiên bản, nên link tải trong README luôn đú
 
 ## [Chưa phát hành]
 
+### Sửa
+- **Dán đoạn văn dài giờ dịch đủ.** Trước đây bản AI chỉ dịch được vài câu đầu rồi mất dấu chấm
+  và bỏ câu sau; nay cả hai bản tách đoạn thành từng câu, dịch từng câu rồi nối lại. Bản thường
+  cũng viết hoa đầu mỗi câu. Câu rất dài (trên ~400 ký tự) được cắt thêm ở dấu phẩy thay vì bị
+  cắt cụt âm thầm.
+- **Dán văn bản có xuống dòng không còn dính chữ.** Ô nhập của JavaFX xoá dấu xuống dòng khi dán,
+  nên chữ cuối dòng dính với chữ đầu dòng sau ("the" + "result" thành "theresult"). Nay mỗi chỗ
+  xuống dòng thành một dấu cách.
+- **Ô tích hiện đúng trạng thái.** Dấu tích luôn hiện kể cả khi chưa chọn (ô "Dùng mô hình AI" và
+  các ô bật/tắt nguồn trong hộp thoại Nguồn từ điển); chức năng vẫn chạy đúng.
+
 
 ## [1.1.0] — 2026-10-04
 
