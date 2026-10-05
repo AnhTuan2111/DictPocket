@@ -12,6 +12,7 @@ import com.anhtuan.dict.core.service.ReverseSearchService;
 import com.anhtuan.dict.core.service.RuleBasedTranslationEngine;
 import com.anhtuan.dict.core.source.SourceCatalog;
 import com.anhtuan.dict.core.spi.TranslationEngine;
+import com.anhtuan.dict.desktop.userdata.HistoryStore;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -38,6 +39,7 @@ public final class AppContext implements AutoCloseable
     private final Set<String> phraseStarters;
 
     private final long startupMillis;
+    private final HistoryStore history;
 
     public AppContext()
     {
@@ -64,6 +66,27 @@ public final class AppContext implements AutoCloseable
         this.sentenceEngine = new RuleBasedTranslationEngine(glossEngine, lookupService, lexicalPrior);
 
         this.startupMillis = (System.nanoTime() - t0) / 1_000_000;
+        this.history = openHistory();
+    }
+
+    // Lịch sử tra nằm ở %APPDATA%\DictPocket\history.tsv, tách khỏi thư mục cài để gỡ hay cài đè không làm mất.
+    // -Ddict.history=<file> đổi chỗ lưu. Lúc chụp ảnh tài liệu thì chỉ giữ trong bộ nhớ, khỏi đụng vào lịch sử thật.
+    private static HistoryStore openHistory()
+    {
+        if (System.getProperty("dict.screenshot") != null)
+        {
+            return HistoryStore.inMemory();
+        }
+        String override = System.getProperty("dict.history");
+        if (override != null && !override.isBlank())
+        {
+            return HistoryStore.open(Path.of(override));
+        }
+        String appData = System.getenv("APPDATA");
+        Path base = appData != null && !appData.isBlank()
+                ? Path.of(appData, "DictPocket")
+                : Path.of(System.getProperty("user.home"), ".dictpocket");
+        return HistoryStore.open(base.resolve("history.tsv"));
     }
 
     public Path dataDir()
@@ -116,6 +139,11 @@ public final class AppContext implements AutoCloseable
         lookupService.setCatalog(updated);
         reverseSearchService.setCatalog(updated);
         updated.save(dataDir.resolve(SourceCatalog.FILE_NAME));
+    }
+
+    public HistoryStore history()
+    {
+        return history;
     }
 
     public ViCompounds compounds()
