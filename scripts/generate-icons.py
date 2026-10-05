@@ -57,6 +57,11 @@ ICONS = {
         ".kBBBBBwwBBBBBk", ".kBBBBBwwBBBBBk", ".kBBBBBwwBBBBBk", ".kBBBBBwwBBBBBk", ".kBBBBBwwBBBBBk",
         ".kBBBBwwwwBBBBk", ".kBBBBBBBBBBBBk", "..kkBBBBBBBBkk", "....kkkkkkkk",
     ],
+    "history": [
+        "", "....kkkkkkkk", "..kkwwwwwwwwkk", ".kwwwwwwwwwwwwk", ".kwwwwwkwwwwwwk", ".kwwwwwkwwwwwwk",
+        ".kwwwwwkwwwwwwk", ".kwwwwwkwwwwwwk", ".kwwwwwkkkkkwwk", ".kwwwwwwwwwwwwk", ".kwwwwwwwwwwwwk",
+        ".kwwwwwwwwwwwwk", ".kwwwwwwwwwwwwk", "..kkwwwwwwwwkk", "....kkkkkkkk",
+    ],
     "warn": [
         "", "......kyyk", "......kyyk", ".....kyyyyk", ".....kyyyyk", "....kyykkyyk", "....kyykkyyk",
         "...kyyykkyyyk", "...kyyykkyyyk", "..kyyyykkyyyyk", "..kyyyyyyyyyyk", ".kyyyyykkyyyyyk",
@@ -147,7 +152,7 @@ def main():
         write(RES / "icon" / f"{name}.ico", ico_bytes(images))
 
     # Icon nút bấm: giữ 16x16, app phóng lên khi hiển thị.
-    for name in ("search", "note", "chat", "folder", "chip", "info", "warn"):
+    for name in ("search", "note", "chat", "folder", "chip", "info", "warn", "history"):
         write(RES / "ui" / f"{name}.png", png_bytes(16, to_pixels(ICONS[name])))
 
 

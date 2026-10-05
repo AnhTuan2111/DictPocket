@@ -8,6 +8,7 @@ import com.anhtuan.dict.core.service.ReverseSearchService;
 import com.anhtuan.dict.desktop.config.AppContext;
 import com.anhtuan.dict.desktop.config.AppVersion;
 import com.anhtuan.dict.desktop.config.NmtSupport;
+import com.anhtuan.dict.desktop.userdata.HistoryStore;
 import com.anhtuan.dict.nmt.OnnxNmtEngine;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -25,6 +26,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -75,6 +77,11 @@ public final class MainView
     // Truy vấn mở sẵn lấy từ tham số dòng lệnh, có thể rỗng
     private final String initialQuery;
 
+    // Gọi lại câu đã tra bằng phím ↑/↓: -1 là đang gõ dở (recallDraft giữ phần đang gõ), 0 là câu mới nhất
+    private int recallIndex = -1;
+    private String recallDraft = "";
+    private boolean recalling;
+
     public MainView(AppContext ctx, List<String> args)
     {
         this.ctx = ctx;
@@ -108,6 +115,15 @@ public final class MainView
         {
             input.requestFocus();
             input.selectAll();
+        });
+        // Ctrl+H phải bắt bằng bộ lọc: trong ô nhập JavaFX hiểu nó là "xoá lùi một ký tự" nên phím tắt thường không tới được
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e ->
+        {
+            if (e.isControlDown() && e.getCode() == KeyCode.H)
+            {
+                e.consume();
+                openHistory();
+            }
         });
 
         stage.show();
@@ -177,6 +193,12 @@ public final class MainView
         sources.setContentDisplay(ContentDisplay.TOP);
         sources.setOnAction(e -> SourceDialog.show(input.getScene().getWindow(), ctx, this::run));
         bar.getChildren().add(sources);
+
+        Button history = new Button("Lịch sử", PixelIcons.large("history"));
+        history.getStyleClass().add("tool");
+        history.setContentDisplay(ContentDisplay.TOP);
+        history.setOnAction(e -> openHistory());
+        bar.getChildren().add(history);
 
         // Chỉ hiện khi có cả thư viện lẫn mô hình. Bản đóng gói thường không kèm AI, lúc đó ô này
         // biến mất và app chạy như cũ.
@@ -258,7 +280,25 @@ public final class MainView
         {
             if (e.getCode() == KeyCode.ENTER)
             {
-                run();
+                search();
+            }
+            else if (e.getCode() == KeyCode.UP)
+            {
+                recall(1);
+                e.consume();
+            }
+            else if (e.getCode() == KeyCode.DOWN)
+            {
+                recall(-1);
+                e.consume();
+            }
+        });
+        // Người dùng tự gõ hay dán thì thôi duyệt lịch sử
+        input.textProperty().addListener((obs, old, text) ->
+        {
+            if (!recalling)
+            {
+                recallIndex = -1;
             }
         });
         HBox.setHgrow(input, Priority.ALWAYS);
@@ -275,6 +315,56 @@ public final class MainView
     }
 
     // ------------------------------------------------------------------ tra cứu
+
+    // Người dùng chủ động tra (Enter, bấm vào kết quả hay gợi ý): tra rồi ghi vào lịch sử. Đổi chế độ hay
+    // chạy lại sau khi bật/tắt nguồn thì không ghi, kẻo cùng một câu bị ghi nhiều lần.
+    private void search()
+    {
+        run();
+        ctx.history().add(mode.name().toLowerCase(Locale.ROOT), input.getText());
+        recallIndex = -1;
+    }
+
+    private void openHistory()
+    {
+        HistoryDialog.show(input.getScene().getWindow(), ctx.history()).ifPresent(entry ->
+        {
+            mode = switch (entry.mode())
+            {
+                case "sentence" -> Mode.SENTENCE;
+                case "reverse" -> Mode.REVERSE;
+                default -> Mode.WORD;
+            };
+            selectModeButton();
+            input.setText(entry.query());
+            search();
+            input.requestFocus();
+            input.positionCaret(input.getText().length());
+        });
+    }
+
+    // direction = 1 là lùi về câu cũ hơn, -1 là tiến về câu mới hơn; tiến quá câu mới nhất thì trả lại phần đang gõ dở
+    private void recall(int direction)
+    {
+        List<HistoryStore.Entry> entries = ctx.history().entries();
+        if (entries.isEmpty())
+        {
+            return;
+        }
+        int next = recallIndex + direction;
+        if (recallIndex == -1 && direction > 0)
+        {
+            recallDraft = input.getText() == null ? "" : input.getText();
+            // Câu vừa tra xong đang nằm sẵn trong ô: bỏ qua nó để ↑ đi thẳng tới câu trước đó
+            next = entries.size() > 1 && entries.get(0).query().equals(recallDraft.strip()) ? 1 : 0;
+        }
+        next = Math.max(-1, Math.min(next, entries.size() - 1));
+        recallIndex = next;
+        recalling = true;
+        input.setText(next == -1 ? recallDraft : entries.get(next).query());
+        input.positionCaret(input.getText().length());
+        recalling = false;
+    }
 
     private void run()
     {
@@ -478,7 +568,7 @@ public final class MainView
     private void searchAgain(String query)
     {
         input.setText(query);
-        run();
+        search();
     }
 
     private void switchMode(Mode target)
@@ -494,7 +584,7 @@ public final class MainView
         mode = Mode.WORD;
         selectModeButton();
         input.setText(headword);
-        run();
+        search();
     }
 
     // Từ bốn từ trở lên thì coi là câu, không phải mục từ cần tra
@@ -514,7 +604,7 @@ public final class MainView
                   · Dịch câu   :  He gave up his job because the system could not keep up
                   · Việt → Anh :  chăm sóc   (gõ không dấu "cham soc" cũng ra cùng kết quả)
 
-                Phím tắt: Ctrl+1 / Ctrl+2 / Ctrl+3 đổi chế độ, Ctrl+L về ô nhập.
+                Phím tắt: Ctrl+1 / Ctrl+2 / Ctrl+3 đổi chế độ, Ctrl+L về ô nhập, Ctrl+H xem lịch sử tra, phím ↑ ↓ gọi lại câu đã tra.
                 """));
         resultHolder.getChildren().setAll(box);
         status.setText(String.format(Locale.ROOT,

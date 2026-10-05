@@ -516,3 +516,31 @@
     -fx-font-size: 11px;
     -fx-text-fill: #404040;
 }
+
+/* ---------- lịch sử tra ---------- */
+
+.list-view {
+    -fx-background-color: #808080, #ffffff, #000000, #dfdfdf, #ffffff;
+    -fx-background-insets: 0, 1 0 0 1, 1, 2 1 1 2, 2;
+    -fx-padding: 2;
+}
+
+.list-view .label {
+    -fx-text-fill: #404040;
+}
+
+.list-cell, .list-cell:odd, .list-cell:even {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-padding: 3 8 3 8;
+    -fx-font-size: 12px;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #e8e8ff;
+}
+
+.list-cell:filled:selected, .list-cell:filled:selected:hover {
+    -fx-background-color: #000080;
+    -fx-text-fill: #ffffff;
+}
