@@ -2,6 +2,7 @@ package com.anhtuan.dict.desktop.ui;
 
 import com.anhtuan.dict.core.model.Entry;
 import com.anhtuan.dict.core.model.Segment;
+import com.anhtuan.dict.core.nlp.SentenceSplitter;
 import com.anhtuan.dict.core.nlp.TextNormalizer;
 import com.anhtuan.dict.core.service.ReverseSearchService;
 import com.anhtuan.dict.desktop.config.AppContext;
@@ -68,6 +69,8 @@ public final class MainView
     // Engine AI nạp ở lần bật đầu tiên, null nghĩa là chưa nạp
     private OnnxNmtEngine nmtEngine;
     private boolean nmtLoading;
+    // Lượt dịch AI đang chạy, để huỷ khi người dùng tra tiếp
+    private Task<String> nmtTask;
 
     // Truy vấn mở sẵn lấy từ tham số dòng lệnh, có thể rỗng
     private final String initialQuery;
@@ -275,6 +278,8 @@ public final class MainView
 
     private void run()
     {
+        // Lượt dịch AI cũ còn đang chạy thì bỏ đi, kẻo kết quả cũ đè lên kết quả mới
+        cancelNmtTask();
         String query = input.getText() == null ? "" : input.getText().trim();
         if (query.isEmpty())
         {
@@ -339,7 +344,15 @@ public final class MainView
 
     private Node translateSentence(String sentence)
     {
-        if (useNmt.isSelected() && nmtEngine != null)
+        // Dán tiếng Việt vào chế độ Anh → Việt thì ra chữ vô nghĩa: báo thẳng thay vì dịch bừa
+        if (TextNormalizer.looksVietnamese(sentence))
+        {
+            return ResultRenderer.note("Đây có vẻ là tiếng Việt. Chế độ này dịch từ tiếng Anh sang tiếng Việt; muốn tìm "
+                    + "từ tiếng Anh cho một nghĩa tiếng Việt thì chuyển sang chế độ Việt → Anh (Ctrl+3).");
+        }
+        // Mô hình AI hay bịa khi chỉ có một từ lẻ, thiếu ngữ cảnh: từ đơn thì dùng từ điển và bộ luật
+        boolean singleWord = sentence.trim().split("\\s+").length < 2;
+        if (useNmt.isSelected() && nmtEngine != null && !singleWord)
         {
             return translateWithNmt(sentence);
         }
@@ -386,17 +399,48 @@ public final class MainView
         VBox box = new VBox(10);
         box.getChildren().add(ResultRenderer.message("Đang dịch bằng mô hình AI ..."));
 
+        // Đoạn nhiều câu dịch từng câu một để báo được tiến độ và huỷ được giữa chừng
         Task<String> task = new Task<>()
         {
             @Override
             protected String call()
             {
-                return nmtEngine.translate(sentence).getFirst().displayGloss();
+                List<String> sentences = SentenceSplitter.split(sentence);
+                StringBuilder vi = new StringBuilder();
+                for (int i = 0; i < sentences.size(); i++)
+                {
+                    if (isCancelled())
+                    {
+                        return null;
+                    }
+                    if (sentences.size() > 1)
+                    {
+                        updateMessage("Đang dịch bằng mô hình AI: câu " + (i + 1) + "/" + sentences.size());
+                    }
+                    if (!vi.isEmpty())
+                    {
+                        vi.append(' ');
+                    }
+                    vi.append(nmtEngine.translate(sentences.get(i)).getFirst().displayGloss());
+                }
+                return vi.toString();
             }
         };
+        nmtTask = task;
+        task.messageProperty().addListener((obs, old, message) ->
+        {
+            if (task == nmtTask && message != null && !message.isEmpty())
+            {
+                status.setText(message);
+            }
+        });
         long t0 = System.nanoTime();
         task.setOnSucceeded(e ->
         {
+            if (task != nmtTask)
+            {
+                return;
+            }
             VBox done = new VBox(10);
             done.getChildren().add(ResultRenderer.translation(task.getValue()));
             done.getChildren().add(
@@ -408,12 +452,26 @@ public final class MainView
             status.setText(String.format(Locale.ROOT, "Mô hình AI trên máy · %,d mục từ · dịch trong %.0f ms",
                     ctx.pack().entryCount(), (System.nanoTime() - t0) / 1_000_000.0));
         });
-        task.setOnFailed(
-                e -> box.getChildren().setAll(ResultRenderer.message("Lỗi khi chạy mô hình: " + task.getException())));
+        task.setOnFailed(e ->
+        {
+            if (task == nmtTask)
+            {
+                box.getChildren().setAll(ResultRenderer.message("Lỗi khi chạy mô hình: " + task.getException()));
+            }
+        });
         Thread thread = new Thread(task, "nmt-translate");
         thread.setDaemon(true);
         thread.start();
         return box;
+    }
+
+    private void cancelNmtTask()
+    {
+        if (nmtTask != null)
+        {
+            nmtTask.cancel();
+            nmtTask = null;
+        }
     }
 
     // Bấm vào gợi ý chính tả thì tra lại bằng từ được gợi ý
